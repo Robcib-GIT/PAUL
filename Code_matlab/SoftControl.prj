@@ -1,0 +1,206 @@
+<deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
+  <configuration file="C:\TFG_software\Code_matlab\SoftControl.prj" location="C:\TFG_software\Code_matlab" name="SoftControl" target="target.ezdeploy.standalone" target-name="Application Compiler">
+    <param.appname>SoftControl</param.appname>
+    <param.icon />
+    <param.icons />
+    <param.version>1.0</param.version>
+    <param.authnamewatermark>Adrian Rieker</param.authnamewatermark>
+    <param.email>adrianrieker@gmail.com</param.email>
+    <param.company />
+    <param.summary />
+    <param.description />
+    <param.screenshot>${PROJECT_ROOT}\Assets\S2.jpg</param.screenshot>
+    <param.guid />
+    <param.installpath.string>\SoftControl\</param.installpath.string>
+    <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
+    <param.logo />
+    <param.install.notes />
+    <param.target.install.notes />
+    <param.intermediate>${PROJECT_ROOT}\SoftControl\for_testing</param.intermediate>
+    <param.files.only>${PROJECT_ROOT}\SoftControl\for_redistribution_files_only</param.files.only>
+    <param.output>${PROJECT_ROOT}\SoftControl\for_redistribution</param.output>
+    <param.logdir>${PROJECT_ROOT}\SoftControl</param.logdir>
+    <param.enable.clean.build>false</param.enable.clean.build>
+    <param.user.defined.mcr.options />
+    <param.target.type>subtarget.standalone</param.target.type>
+    <param.support.packages>
+      <item>&lt;package displayname="Hyperspectral Imaging Library Support Package" enabled="true" name="Hyperspectral Imaging Library Support Package" product="Image Processing Toolbox"/&gt;</item>
+      <item>&lt;package displayname="USB Webcams" enabled="true" name="USB Webcams" product="MATLAB"/&gt;</item>
+    </param.support.packages>
+    <param.web.mcr>false</param.web.mcr>
+    <param.package.mcr>true</param.package.mcr>
+    <param.no.mcr>false</param.no.mcr>
+    <param.web.mcr.name>MyAppInstaller_web</param.web.mcr.name>
+    <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
+    <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
+    <param.windows.command.prompt>true</param.windows.command.prompt>
+    <param.create.log>false</param.create.log>
+    <param.log.file />
+    <param.native.matlab>false</param.native.matlab>
+    <param.checkbox>false</param.checkbox>
+    <param.example />
+    <param.help.text>Syntax 
+	  -? 
+	 
+ Input Arguments 
+	 -?  print help on how to use the application 
+	 input arguments</param.help.text>
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.version />
+      <param.company />
+      <param.summary />
+      <param.description />
+      <param.guid />
+      <param.installpath.string />
+      <param.installpath.combo />
+      <param.logo />
+      <param.install.notes />
+      <param.target.install.notes />
+      <param.intermediate />
+      <param.files.only />
+      <param.output />
+      <param.logdir />
+      <param.enable.clean.build />
+      <param.user.defined.mcr.options />
+      <param.target.type />
+      <param.no.mcr />
+      <param.web.mcr.name />
+      <param.package.mcr.name />
+      <param.no.mcr.name />
+      <param.windows.command.prompt />
+      <param.create.log />
+      <param.log.file />
+      <param.native.matlab />
+      <param.checkbox />
+      <param.example />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\Interfaz.mlapp</file>
+    </fileset.main>
+    <fileset.resources>
+      <file>${PROJECT_ROOT}\Assets\Banco_adrian.jpg</file>
+      <file>${PROJECT_ROOT}\Assets\S1.jpg</file>
+      <file>${PROJECT_ROOT}\Assets\S2.jpg</file>
+      <file>${PROJECT_ROOT}\Assets\S3.jpg</file>
+      <file>${PROJECT_ROOT}\buscador_posicion.m</file>
+      <file>${PROJECT_ROOT}\calibracion.m</file>
+      <file>${PROJECT_ROOT}\datafilter.m</file>
+      <file>${PROJECT_ROOT}\dataset_combinator.m</file>
+      <file>${PROJECT_ROOT}\dataset_dataset.mat</file>
+      <file>${PROJECT_ROOT}\dataset_dataset_250_2.mat</file>
+      <file>${PROJECT_ROOT}\desinflar.m</file>
+      <file>${PROJECT_ROOT}\filtro_dataset_segmento_roto.m</file>
+      <file>${PROJECT_ROOT}\findCameraPose.m</file>
+      <file>${PROJECT_ROOT}\findPoint.m</file>
+      <file>${PROJECT_ROOT}\gamma_.m</file>
+      <file>${PROJECT_ROOT}\getCoordinates.m</file>
+      <file>${PROJECT_ROOT}\getRotations.m</file>
+      <file>${PROJECT_ROOT}\imagenes_calibracion.m</file>
+      <file>${PROJECT_ROOT}\imageThreshold.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdBlack.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdBlue_xz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdBlue_yz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdGreen_xz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdGreen_yz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdOrange_xz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdOrange_yz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdPurple.m</file>
+      <file>${PROJECT_ROOT}\Interfaz.mlapp</file>
+      <file>${PROJECT_ROOT}\Interfaz.prj</file>
+      <file>${PROJECT_ROOT}\matlab.mat</file>
+      <file>${PROJECT_ROOT}\MOV1.m</file>
+      <file>${PROJECT_ROOT}\move2pos.asv</file>
+      <file>${PROJECT_ROOT}\move2pos.m</file>
+      <file>${PROJECT_ROOT}\net_sys1.mat</file>
+      <file>${PROJECT_ROOT}\par.mat</file>
+      <file>${PROJECT_ROOT}\pos2pos.m</file>
+      <file>${PROJECT_ROOT}\prueba.m</file>
+      <file>${PROJECT_ROOT}\Robot.asv</file>
+      <file>${PROJECT_ROOT}\Robot.m</file>
+      <file>${PROJECT_ROOT}\rt.m</file>
+      <file>${PROJECT_ROOT}\scara_things.m</file>
+      <file>${PROJECT_ROOT}\sintersec.m</file>
+      <file>${PROJECT_ROOT}\Solving_Inverse_Kinematics_with_Nonlinear_ANN.m</file>
+      <file>${PROJECT_ROOT}\takeStereoImages.m</file>
+      <file>${PROJECT_ROOT}\test.m</file>
+      <file>${PROJECT_ROOT}\trilateration.m</file>
+      <file>${PROJECT_ROOT}\untitled3.m</file>
+      <file>${PROJECT_ROOT}\writeOneValveMillis.m</file>
+      <file>${PROJECT_ROOT}\writeOneValveMillis.prj</file>
+      <file>${PROJECT_ROOT}\writeToarduino.m</file>
+    </fileset.resources>
+    <fileset.package />
+    <fileset.depfun>
+      <file>C:\ProgramData\MATLAB\SupportPackages\R2022a\toolbox\matlab\webcam\supportpackages\+matlab\+webcam\+internal\Utility.p</file>
+      <file>C:\ProgramData\MATLAB\SupportPackages\R2022a\toolbox\matlab\webcam\supportpackages\+matlab\+webcam\+internal\WebcamDataUtilityHelper.p</file>
+      <file>C:\ProgramData\MATLAB\SupportPackages\R2022a\toolbox\matlab\webcam\supportpackages\+matlab\+webcam\+internal\WebcamDataUtilityParser.p</file>
+      <file>C:\ProgramData\MATLAB\SupportPackages\R2022a\toolbox\matlab\webcam\supportpackages\+matlab\+webcam\+internal\webcamDesktop.p</file>
+      <file>C:\ProgramData\MATLAB\SupportPackages\R2022a\toolbox\matlab\webcam\supportpackages\+matlab\+webcam\+internal\webcamOnline.p</file>
+      <file>C:\ProgramData\MATLAB\SupportPackages\R2022a\toolbox\matlab\webcam\supportpackages\webcam.m</file>
+    </fileset.depfun>
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}\SoftControl\for_testing" name="readme.txt" optional="true">C:\TFG_software\Code_matlab\SoftControl\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\SoftControl\for_testing" name="SoftControl.exe" optional="false">C:\TFG_software\Code_matlab\SoftControl\for_testing\SoftControl.exe</file>
+      <file location="${PROJECT_ROOT}\SoftControl\for_testing" name="splash.png" optional="false">C:\TFG_software\Code_matlab\SoftControl\for_testing\splash.png</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2022a</root>
+      <toolboxes>
+        <toolbox name="matlabcoder" />
+        <toolbox name="embeddedcoder" />
+        <toolbox name="gpucoder" />
+        <toolbox name="fixedpoint" />
+        <toolbox name="matlabhdlcoder" />
+        <toolbox name="neuralnetwork" />
+      </toolboxes>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <embeddedcoder>
+          <enabled>true</enabled>
+        </embeddedcoder>
+      </toolbox>
+      <toolbox>
+        <gpucoder>
+          <enabled>true</enabled>
+        </gpucoder>
+      </toolbox>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <matlabhdlcoder>
+          <enabled>true</enabled>
+        </matlabhdlcoder>
+      </toolbox>
+      <toolbox>
+        <neuralnetwork>
+          <enabled>true</enabled>
+        </neuralnetwork>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>

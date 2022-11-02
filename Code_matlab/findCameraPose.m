@@ -8,18 +8,18 @@ img = snapshot(cam);
 
 % Deteccion del patron
 [imagePoints,boardSize] = detectCheckerboardPoints(im);
-squareSize = 20;
+squareSize = 20; % Tamano del tablero en mm
 worldPoints = generateCheckerboardPoints(boardSize, squareSize);
 
+% Obtencion de los parametros extrinsics
 [rotationMatrix, translationVector] = extrinsics(imagePoints,worldPoints,cameraPar);
 
-[orientation, location] = extrinsicsToCameraPose(rotationMatrix, ...
-  translationVector);
+% Se muestra gráficamente la posición de la camara
+[orientation, location] = extrinsicsToCameraPose(rotationMatrix, translationVector);
 figure
 plotCamera('Location',location,'Orientation',orientation,'Size',20);
 hold on
-pcshow([worldPoints,zeros(size(worldPoints,1),1)], ...
-  'VerticalAxisDir','down','MarkerSize',40);
+pcshow([worldPoints,zeros(size(worldPoints,1),1)],'VerticalAxisDir','down','MarkerSize',40);
 
 rotation = rotationMatrix;
 translation = translationVector;
