@@ -1,0 +1,123 @@
+<deployment-project plugin="plugin.webdeploy" plugin-version="1.0">
+  <configuration file="C:\TFG_software\Code_matlab\Interfaz.prj" location="C:\TFG_software\Code_matlab" name="Interfaz" target="target.webdeploy" target-name="Web App Compiler">
+    <param.appname>Interfaz</param.appname>
+    <param.intermediate>${PROJECT_ROOT}\Interfaz</param.intermediate>
+    <param.files.only>${PROJECT_ROOT}\Interfaz</param.files.only>
+    <param.output />
+    <param.checkbox>false</param.checkbox>
+    <param.logdir>${PROJECT_ROOT}\Interfaz</param.logdir>
+    <param.target.type>subtarget.web.app</param.target.type>
+    <param.user.defined.mcr.options />
+    <param.support.packages />
+    <unset>
+      <param.intermediate />
+      <param.files.only />
+      <param.output />
+      <param.checkbox />
+      <param.logdir />
+      <param.target.type />
+      <param.user.defined.mcr.options />
+      <param.support.packages />
+    </unset>
+    <fileset.web.main>
+      <file>${PROJECT_ROOT}\Interfaz.mlapp</file>
+    </fileset.web.main>
+    <fileset.resources>
+      <file>${PROJECT_ROOT}\buscador_posicion.m</file>
+      <file>${PROJECT_ROOT}\calibracion.m</file>
+      <file>${PROJECT_ROOT}\datafilter.m</file>
+      <file>${PROJECT_ROOT}\dataset_400.mat</file>
+      <file>${PROJECT_ROOT}\dataset_combinator.m</file>
+      <file>${PROJECT_ROOT}\desinflar.m</file>
+      <file>${PROJECT_ROOT}\findCameraPose.m</file>
+      <file>${PROJECT_ROOT}\findPoint.m</file>
+      <file>${PROJECT_ROOT}\gamma_.m</file>
+      <file>${PROJECT_ROOT}\getCoordinates.m</file>
+      <file>${PROJECT_ROOT}\getRotations.m</file>
+      <file>${PROJECT_ROOT}\imagenes_calibracion.m</file>
+      <file>${PROJECT_ROOT}\imageThreshold.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdBlack.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdBlue_xz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdBlue_yz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdGreen_xz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdGreen_yz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdOrange_xz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdOrange_yz.m</file>
+      <file>${PROJECT_ROOT}\imageThresholdPurple.m</file>
+      <file>${PROJECT_ROOT}\matlab.mat</file>
+      <file>${PROJECT_ROOT}\MOV1.m</file>
+      <file>${PROJECT_ROOT}\move2pos.m</file>
+      <file>${PROJECT_ROOT}\net_sys1.mat</file>
+      <file>${PROJECT_ROOT}\par.mat</file>
+      <file>${PROJECT_ROOT}\pos2pos.m</file>
+      <file>${PROJECT_ROOT}\prueba.m</file>
+      <file>${PROJECT_ROOT}\Robot.m</file>
+      <file>${PROJECT_ROOT}\takeStereoImages.m</file>
+      <file>${PROJECT_ROOT}\trilateration.m</file>
+      <file>${PROJECT_ROOT}\writeOneValveMillis.m</file>
+      <file>${PROJECT_ROOT}\writeToarduino.m</file>
+    </fileset.resources>
+    <fileset.depfun />
+    <fileset.package />
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}\Interfaz" name="Interfaz.ctf" optional="false">C:\TFG_software\Code_matlab\Interfaz\Interfaz.ctf</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2022a</root>
+      <toolboxes>
+        <toolbox name="matlabcoder" />
+        <toolbox name="embeddedcoder" />
+        <toolbox name="gpucoder" />
+        <toolbox name="fixedpoint" />
+        <toolbox name="matlabhdlcoder" />
+        <toolbox name="neuralnetwork" />
+      </toolboxes>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <embeddedcoder>
+          <enabled>true</enabled>
+        </embeddedcoder>
+      </toolbox>
+      <toolbox>
+        <gpucoder>
+          <enabled>true</enabled>
+        </gpucoder>
+      </toolbox>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <matlabhdlcoder>
+          <enabled>true</enabled>
+        </matlabhdlcoder>
+      </toolbox>
+      <toolbox>
+        <neuralnetwork>
+          <enabled>true</enabled>
+        </neuralnetwork>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
