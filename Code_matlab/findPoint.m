@@ -40,7 +40,7 @@ function point = findPoint(rgb,color, camera, debug)
     
     % Filtramos por excentricidad
     stats = regionprops('table',mserCC,'Eccentricity');
-    eccentricityIdx = stats.Eccentricity < 0.99;
+    eccentricityIdx = stats.Eccentricity < 1 ;
     misRegiones = misRegiones(eccentricityIdx);
 
     % Comprobamos numero de regiones detectadas
@@ -57,13 +57,16 @@ function point = findPoint(rgb,color, camera, debug)
         
         imshow(rgb);
         pause(0.2);
+        figure;
         imshow(BW);
-        hold on;
+        figure;
         pause(0.2);
+        imshow(BW);
+        hold on
         plot(misRegiones);
         text(x,y, color);
         pause(0.2) 
-        close();
+        %close();
     end
 
     point = [x,y];
