@@ -1,5 +1,5 @@
 
-function [pointReal] = getCoordinates(yz, xz, matyz, matxz, dx, dy, dz, zoffset)
+            
 
 %yz, xz son las coordenadas de un punto en dos imagenes
 % matyz, maxz son dos matrices que contienen los parametros extrinsecos de
