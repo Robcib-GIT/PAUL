@@ -3,7 +3,9 @@
 Trabajo final de grado para el grado en ingeniería tecnologías Industriales consistente en el diseño y conformado de un robot manipulador blando actuado neumaticamente,
 así como la programación de un software para su respectivo control
 
-https://www.youtube.com/watch?v=N3J1oKG8rpQ&list=PLF4WJaMT_8YeHmmFcZnSuC1azHqS5d0rf&index=5
+
+Videos demostración: https://www.youtube.com/watch?v=N3J1oKG8rpQ&list=PLF4WJaMT_8YeHmmFcZnSuC1azHqS5d0rf&index=5
+Vídeo fabricación: https://www.youtube.com/watch?v=WlBE3JDpxWw
 
 ![image](https://user-images.githubusercontent.com/92983875/197029208-5e46d80d-6c36-4bec-9547-3e9aa1b69e1d.png)
 
