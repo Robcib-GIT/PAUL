@@ -1,0 +1,33 @@
+for i = 1:360 
+    a(i,1) = gamma_(i);  
+    a(i,2) = gamma_(i + 120); 
+    a(i,3) = gamma_(i + 240); 
+end
+
+t = (1: 1 : 481);
+
+figure;
+hold on
+title("Función gamma_")
+xlabel("Ángulo")
+ylabel("Curvatura * gamma_(ángulo + phi)")
+plot(t,1000*a);
+
+figure;
+subplot(3,1,1);
+title("Curvatura = 1000")
+xlabel("Ángulo")
+ylabel("Curvatura * gamma_(ángulo + phi)")
+plot(t,1000*a);
+
+subplot(3,1,2);
+title("Curvatura = 500")
+xlabel("Ángulo")
+ylabel("Curvatura * gamma_(ángulo + phi)")
+plot(t,500*a);
+
+subplot(3,1,3);
+title("Curvatura = 100")
+xlabel("Ángulo")
+ylabel("Curvatura * gamma_(ángulo + phi)")
+plot(t,100*a);
