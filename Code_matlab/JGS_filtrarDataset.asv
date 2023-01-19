@@ -1,0 +1,32 @@
+%% Eliminar datos defectuosos dataset
+
+% Jorge F. García-Samartín
+% www.gsamartin.es
+% 2023-01-18
+
+function data = JGS_filtrarDataset(data)
+    
+    % Definimos los límites de cada variable
+    lims = [-200 400;...
+        -200 400;...
+        -100 40;...
+        -0.7 2.1;...
+        -0.7 1;...
+        -0.7 1];
+    
+    % Eliminamos las filas fuera de los límites o con -1 en los ángulos
+    for i = 1:size(data, 1)
+        for j = 1:size(data, 2)
+            if data(i,j) > lims(j,1) && data(i,j) < lims(j, 2)
+                continue
+            else
+                data(i,:) = [];
+                break
+            end
+        end
+        if data(i,4:6) == [-1 -1 -1]
+            data(i,:) =
+    end
+
+
+end
