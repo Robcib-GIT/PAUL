@@ -10,8 +10,8 @@ load('JGS_datosTodo.mat')
 data.inputs = datosTodo.inputs(goodRows, :);
 
 % Datos de entrenamiento
-inputs = rescale(data.inputs)';
-outputs = rescale(data.outputs)';
+inputs, mI = JGS_normalize(data.inputs)';
+outputs, mO = JGS_normalize(data.outputs)';
 
 % Creación de la red
 % net = feedforwardnet([25 25 25]); % 97 75 68
@@ -20,7 +20,8 @@ outputs = rescale(data.outputs)';
 % net = feedforwardnet([50 25 25]); % 90 66 71
 % net = feedforwardnet([25 25 50]); % 87 75 67
 % net = feedforwardnet([40 40]); % 93 67 79
-net = feedforwardnet([30 30]); % 89 78 73
+% net = feedforwardnet([30 30]); % 89 78 73
+net = feedforwardnet([37 70 51]); % 93 59 73
 
 %net = cascadenet(350);
 
