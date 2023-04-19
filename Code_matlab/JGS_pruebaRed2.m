@@ -1,8 +1,8 @@
-%% Entrenamiento Red Neuronal de prueba
+%% Entrenamiento Red Neuronal de prueba sin normalizar
 
 % Jorge F. García-Samartín
 % www.gsamartin.es
-% 2023-01-17
+% 2023-04-17
 
 %% Entrenamos la red
 load('JGS_datosTodo.mat')
@@ -10,8 +10,8 @@ load('JGS_datosTodo.mat')
 data.inputs = datosTodo.inputs(goodRows, :);
 
 % Datos de entrenamiento
-inputs, mI = JGS_normalize(data.inputs);
-outputs, mO = JGS_normalize(data.outputs);
+inputs = data.inputs / 100;
+outputs = data.outputs / 100;
 
 % Creación de la red
 % net = feedforwardnet([25 25 25]); % 97 75 68
@@ -26,4 +26,12 @@ net = feedforwardnet([37 70 51]); % 93 59 73
 %net = cascadenet(350);
 
 % Entrenamiento de la red
-[net,tr] = train(net, inputs, outputs);
+[net,tr] = train(net, inputs', outputs');
+
+% Resultados
+error = zeros(size(data.outputs,1),1);
+int = 1:3;
+for i = 1:size(data.outputs,1)
+    res = sim(net, data.inputs(i,:)'/100);
+    error(i) = norm(100*res(int) - data.outputs(i,int)');
+end
