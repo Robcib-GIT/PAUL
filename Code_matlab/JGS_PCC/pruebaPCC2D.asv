@@ -1,0 +1,26 @@
+%% Modelo PCC en 2D. Prueba de las fórmulas de la 
+% Jorge F. García-Samartín
+% www.gsamartin.es
+% 2023-04-19
+
+% Definición de parámetros
+a = 5;
+r = 10;
+theta = 2*pi/3;
+
+% Dibujo de los círculos
+circle(r,0,r-a,theta);
+circle(r,0,r,theta);
+circle(r,0,r+a,theta);
+
+% Función auxiliar para crear arcos de circunferencia con centro en (x,y),
+% radio R y límite theta
+function h = circle(x,y,r,theta)
+    hold on
+    axis equal
+    th = pi:-pi/50:theta;
+    xunit = r * cos(th) + x;
+    yunit = r * sin(th) + y;
+    h = plot(xunit, yunit);
+    hold off
+end
