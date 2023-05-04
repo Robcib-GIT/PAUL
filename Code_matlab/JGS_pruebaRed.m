@@ -10,8 +10,8 @@ load('JGS_datosTodo.mat')
 data.inputs = datosTodo.inputs(goodRows, :);
 
 % Datos de entrenamiento
-inputs, mI = JGS_normalize(data.inputs)';
-outputs, mO = JGS_normalize(data.outputs)';
+inputs, mI = JGS_normalize(data.inputs);
+outputs, mO = JGS_normalize(data.outputs);
 
 % Creación de la red
 % net = feedforwardnet([25 25 25]); % 97 75 68
