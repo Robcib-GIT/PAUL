@@ -19,7 +19,7 @@ channel1Min = 0;
 channel1Max = 0;
 
 % Define thresholds for channel 2 based on histogram settings
-channel2Min = 0.67;
+channel2Min = 0.57;
 channel2Max = 1.000;
 
 % Define thresholds for channel 3 based on histogram settings
