@@ -7,7 +7,7 @@
 % robot, conocida la posición de su extremo (x) y el diámetro de la
 % circunferenca que forman estos (a). En x se puede incluir o no orientación.
 % 
-% [l, params] = MCD(x, a) devuelve, además de las longitudes de los cables,
+% [l, params] = MCI(x, a) devuelve, además de las longitudes de los cables,
 % una estructura con los valores de lr (longitud media), phi
 % (orientación) y kappa (curvatura)
 %
