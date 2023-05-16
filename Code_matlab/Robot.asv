@@ -42,6 +42,14 @@ classdef Robot < handle
             end
 
             this.millisSentToValves = zeros(1, this.nValves);
+
+            % Camera representation
+            figure;
+            title('Images captured by the cameras')
+            this.cam.UIAxes_yz = subplot(1,2,1);
+            this.cam.UIAxes_yz.title = 'Camera_YZ';
+            this.cam.UIAxes_xz = subplot(1,2,2);
+            this.cam.UIAxes_xz.title = 'Camera_XZ';
         end
 
         function this = delete(this)
@@ -119,8 +127,49 @@ classdef Robot < handle
         end
 
         function SetZero(this)
-            % Transform rotation matrixes of the cameras to make the origin
-            % the 
+            % Transform rotation matrixes of the cameras to make the
+            % original green dot the home position
+
+            % Taking images with the cameras
+            this.img_yz = snapshot(this.cam_yz);
+            this.img_xz = snapshot(this.cam_xz);
+            imshow(this.img_yz,'Parent',this.cam.UIAxes_yz);
+            imshow(this.img_xz, 'Parent', this.cam.UIAxes_xz);
+            
+            % Searching for red, green and blue dots
+            yz_r = findPoint(this.img_yz, 'o',"yz");
+            yz_g = findPoint(this.img_yz, 'g',"yz");
+            yz_b = findPoint(this.img_yz, 'b',"yz");
+            xz_r = findPoint(this.img_xz, 'o',"xz");
+            xz_g = findPoint(this.img_xz, 'g',"xz");
+            xz_b = findPoint(this.img_xz, 'b',"xz");
+
+            % Coordinates of these points
+            this.cam.r = getCoordinates(yz_r,xz_r,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.cam.z_offset);
+            this.cam.g = getCoordinates(yz_g,xz_g,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.cam.z_offset);
+            this.cam.b = getCoordinates(yz_b,xz_b,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.cam.z_offset);
+
+            % Plotting
+            hold(this.cam.UIAxes_yz, 'on')
+            hold(this.cam.UIAxes_xz, 'on')
+            plot(yz_g(1) ,yz_g(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','green');
+            plot(xz_g(1), xz_g(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','green')
+            plot(yz_b(1), yz_b(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','red');
+            plot(xz_b(1), xz_b(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','red')
+            plot(yz_r(1), yz_r(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','red');
+            plot(xz_r(1), xz_r(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','red')
+            plot([yz_b(1) yz_g(1)], [yz_b(2) yz_g(2)], 'g', 'Parent',this.cam.UIAxes_yz);
+            plot([yz_b(1) yz_r(1)], [yz_b(2) yz_r(2)], 'g', 'Parent',this.cam.UIAxes_yz);
+            plot([yz_g(1) yz_r(1)], [yz_g(2) yz_r(2)], 'g', 'Parent',this.cam.UIAxes_yz);
+            plot([xz_b(1) xz_g(1)], [xz_b(2) xz_g(2)], 'g', 'Parent',this.cam.UIAxes_xz);
+            plot([xz_b(1) xz_r(1)], [xz_b(2) xz_r(2)], 'g', 'Parent',this.cam.UIAxes_xz);
+            plot([xz_g(1) xz_r(1)], [xz_g(2) xz_r(2)], 'g', 'Parent',this.cam.UIAxes_xz);
+            
+            this.dx = this.cam.g(1);
+            this.dy = this.cam.g(2);
+            this.dz = this.cam.g(3);
+
+        end
 
         function CapturePosition(this)
             % Capture pictures with the cameras and returns end tip
@@ -130,12 +179,6 @@ classdef Robot < handle
             % Take pictures with both cameras
             this.img_yz = snapshot(this.cam_yz);
             this.img_xz = snapshot(this.cam_xz);
-            figure;
-            title('Images captured by the cameras')
-            this.cam.UIAxes_yz = subplot(1,2,1);
-            title('Camera Y_z');
-            this.cam.UIAxes_xz = subplot(1,2,2);
-            title('Camera X_z');
             imshow(this.img_yz,'Parent',this.cam.UIAxes_yz);
             imshow(this.img_xz, 'Parent', this.cam.UIAxes_xz);
             
@@ -200,7 +243,17 @@ classdef Robot < handle
 
         end
         
-        %% Sending pressure to a valve
+        %% Sending pressure to valves
+        function Deflate(this)
+            % Robot.Deflate() deflates all the valves, sending negative
+            % pressure during the time specified in this.deflatingTime,
+            % which default value is 1000
+
+            deflateMillis = "w,1";
+            for i = 1:this.nValves
+                strcat(deflateMillis, "-", this.deflatingTime, )
+        end
+
         function WriteOneValveMillis(this, valv, millis)
             % Robot.WriteOneValveMillis(valv, millis) sends to valve valv
             % air during the time specified in millis.

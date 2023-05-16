@@ -243,7 +243,21 @@ classdef Robot < handle
 
         end
         
-        %% Sending pressure to a valve
+        %% Sending pressure to valves
+        function Deflate(this)
+            % Robot.Deflate() deflates all the valves, sending negative
+            % pressure during the time specified in this.deflatingTime,
+            % which default value is 1000
+
+            deflateMillis = "w,1";
+            for i = 1:this.nValves
+                strcat(deflateMillis, ",-", this.deflatingTime);
+            end
+            writeline(this.serialDevice, deflateMillis);
+
+            pause(2 * this.deflatingTime);
+        end
+
         function WriteOneValveMillis(this, valv, millis)
             % Robot.WriteOneValveMillis(valv, millis) sends to valve valv
             % air during the time specified in millis.
