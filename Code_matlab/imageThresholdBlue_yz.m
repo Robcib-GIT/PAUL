@@ -79,7 +79,7 @@ end
 function polyBW = applyPolygons(J,polyBW)
 
 % Define each manually generated ROI
-hPoints(1).data = [0.736652 -0.226432;
+hPoints(1).data = [0.636652 -0.226432;
     0.877639 -0.835002;
     1.206606 -0.100186];
 
