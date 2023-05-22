@@ -10,20 +10,20 @@ r.Connect();
 r.Deflate();
 
 %% Calibración
-r.writeOneValveMillis(0, 400);
+r.WriteOneValveMillis(0, 400);
 pause(2);
-r.writeOneValveMillis(0, -400);
+r.WriteOneValveMillis(0, -400);
 pause(1);
-r.writeOneValveMillis(1, 400);
+r.WriteOneValveMillis(1, 400);
 pause(2);
-r.writeOneValveMillis(1, -400);
+r.WriteOneValveMillis(1, -400);
 pause(1);
-r.writeOneValveMillis(2, 400);
+r.WriteOneValveMillis(2, 400);
 pause(2);
-r.writeOneValveMillis(2, -400);
+r.WriteOneValveMillis(2, -400);
 pause(1);
 
 %% Captura de datos
 
 %% Desconexión
-delete(obj);
+r.delete(); 

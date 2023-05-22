@@ -47,9 +47,9 @@ classdef Robot < handle
             figure;
             title('Images captured by the cameras')
             this.cam.UIAxes_yz = subplot(1,2,1);
-            this.cam.UIAxes_yz.title = 'Camera_YZ';
+            title(this.cam.UIAxes_yz,'CAM_YZ');
             this.cam.UIAxes_xz = subplot(1,2,2);
-            this.cam.UIAxes_xz.title = 'Camera_XZ';
+            title(this.cam.UIAxes_xz,'CAM_XZ');
         end
 
         function this = delete(this)
