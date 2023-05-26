@@ -5,9 +5,12 @@
 % 2023-05-16
 
 %% Configuración
+clear
+close all
 r = Robot();
 r.Connect();
 r.Deflate();
+disp('Desinflado')
 
 %% Calibración
 r.WriteOneValveMillis(0, 400);

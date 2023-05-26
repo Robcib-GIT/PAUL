@@ -7,14 +7,13 @@
 classdef Robot < handle
 
     properties (Access = public)
-        serialDevice;                       % Serial port to which Arduino is connected
-        deflatingTime = 1000;               % Default deflating time
-        deflatingRatio = 1.4;               % Relation between deflation and inflation time
-        nValves = 9;                        % Number of valves
-        nSensors = 3;                       % Number of sensors
-        millisSentToValves;                 % Milliseconds of air each valve has received
-        voltages;                           % Voltages read using the INAs
-        serialData = '';
+        serialDevice;                   % Serial port to which Arduino is connected
+        deflatingTime = 1000;           % Default deflating time
+        deflatingRatio = 1.4;           % Relation between deflation and inflation time
+        nValves = 9;                    % Number of valves
+        nSensors = 3;                   % Number of sensors
+        millisSentToValves;             % Milliseconds of air each valve has received
+        voltages = zeros(nSensors + 6, 1);            % Voltages read using the INAs
 
         % Cameras
         cam_xz;
@@ -45,7 +44,6 @@ classdef Robot < handle
             end
 
             this.millisSentToValves = zeros(1, this.nValves);
-            this.voltages = zeros(this.nSensors, 1);
 
             % Camera representation
             figure;
@@ -81,15 +79,15 @@ classdef Robot < handle
             % freq: 9600
 
             switch nargin
-                case 2
-                    freq = 9600;
                 case 1
                     freq = 9600;
+                case 0
+                    freq = 3600;
                     serial = 'COM3';
             end
     
             this.serialDevice = serialport(serial, freq);
-            configureCallback(this.serialDevice, "terminator", @(varargin)this.ReadSerialData)
+            configureCallback(this.serialDevice, "terminator", @this.ReadSerialData)
         end
         
         %% Camera callibration and capture
@@ -256,11 +254,11 @@ classdef Robot < handle
 
             deflateMillis = "w,1";
             for i = 1:this.nValves
-                deflateMillis = strcat(deflateMillis, ",-", int2str(this.deflatingTime));
+                strcat(deflateMillis, ",-", this.deflatingTime);
             end
             writeline(this.serialDevice, deflateMillis);
 
-            pause(this.deflatingTime / 500);        % Pause works with seconds. A pause of 2 times the deflating time is done
+            pause(2 * this.deflatingTime);
         end
 
         function WriteOneValveMillis(this, valv, millis)
@@ -277,7 +275,7 @@ classdef Robot < handle
                 writeline(this.serialDevice, "e" + int2str(valv) + "," + int2str(-millis * this.deflatingRatio));
             end
 
-            this.millisSentToValves(valv+1) = this.millisSentToValves(valv+1) + millis;
+            this.millisSentToValves(valv) = this.millisSentToValves(valv) + millis;
         end
         
         %% Reading valve state and sensors
@@ -314,10 +312,8 @@ classdef Robot < handle
             % this.voltages array
 
             data = readline(this.serialDevice);
-            disp(data)
-            this.serialData = [this.serialData;data];
-%             data = split(data);
-%             this.voltages(:,end+1) = str2double(data);
+            data = split(data);
+            this.voltages(:,end+1) = str2double(data);
         end
 
     end
