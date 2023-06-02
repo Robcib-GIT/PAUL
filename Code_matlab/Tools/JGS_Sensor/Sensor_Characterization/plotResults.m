@@ -7,7 +7,7 @@
 close all
 
 %% Configuración
-inicio = 1;
+inicio = 19;
 fin = 23;
 condsAll = [];
 datosAll = [];
