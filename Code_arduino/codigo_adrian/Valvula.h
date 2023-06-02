@@ -120,6 +120,11 @@ class Valvula
                 return emergency_halted;
             }
 
+            int get_actual_pressure()
+            {
+                return actual_pressure;
+            }
+
             void set_mult(float a)
             {
                 transf_mult = a;

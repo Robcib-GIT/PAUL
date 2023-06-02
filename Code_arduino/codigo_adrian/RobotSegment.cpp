@@ -2,14 +2,26 @@
 
 using namespace Robot;
 
+stretchSensor::stretchSensor() {
+  channel = INA3221_CH1;
+  pin = 0;
+  max_value = 0;
+  min_value = 0;
+  prev_time = 0;
+  curr_value = 0;
+  first_time_calibration = true;
+  calibration_time = 5000;
+}
 
-
-
-
-
-stretchSensor::stretchSensor(uint8_t pin)
+stretchSensor::stretchSensor(uint8_t channelNum)
 {
-    this->pin = pin;
+    switch (channelNum) {
+      case 0: channel = INA3221_CH1; break;
+      case 1: channel = INA3221_CH2; break;
+      case 2: channel = INA3221_CH3; break;
+    }
+    pin = channelNum;
+    calibration_time = 5000;
 }
 
 
@@ -59,5 +71,37 @@ void stretchSensor::calibrateBloqueante()
 uint16_t stretchSensor::readCalibratedValue()
 {
     return map(readRaw(), min_value, max_value, 0, 1000);
+}
+
+
+/*********************************************************
+  CLASE INA
+*********************************************************/
+myINA::myINA()
+{
+    INA3221 ina_temp(INA3221_ADDR40_GND);
+    this -> ina = &ina_temp;
+    this -> num_channels = 1;
+    this -> sensor[0] = stretchSensor(0);
+}
+
+myINA::myINA(ina3221_addr_t address, uint8_t num_channels)
+{
+    INA3221 ina_temp(address);
+    this -> ina = &ina_temp;
+    this -> num_channels = num_channels;
+
+    for (uint8_t i = 0; i < num_channels; i++) {
+      this -> sensor[i] = stretchSensor(i);
+    }
+
+}
+
+void myINA::measure() {
+    for (uint8_t i = 0; i < num_channels; i++) {
+      this -> measures[i] = this -> ina -> getVoltage(this->sensor[i].getChannel());
+      Serial.print(this -> measures[i]);
+      Serial.print(" ");
+    }
 }
 

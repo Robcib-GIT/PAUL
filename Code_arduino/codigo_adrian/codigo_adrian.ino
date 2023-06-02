@@ -1,26 +1,28 @@
 #include "Config.h"
 #include "RobotSegment.h"
 #include "Valvula.h"
-#include <Wire.h>
-#include <INA3221.h>
+
+#define P_V_RATIO (8.7 - 9) / 400
 
 // ############### Objetos globales ################
 
 // Numero de valvulas. Se considera valvula al conjunto de una 22 + una 23
 
 // Sensores elasticos
-/*Robot::stretchSensor sensor1(A0);
-Robot::stretchSensor sensor2(A1);
-Robot::stretchSensor sensor3(A2);*/
+const uint8_t num_inas = 1;
+Robot::myINA *ina[num_inas];
+ina3221_addr_t addresses[num_inas] = {INA3221_ADDR40_GND};
+
+INA3221 ina_0(INA3221_ADDR40_GND);
+
+// Si se trabaja con robot real o con modelo
+uint8_t real_robot = 1;
+const float length_constant = 0.05;
 
 // Modo normal
 modos State = S_NORMAL;
 
-// Sensores
-INA3221 ina_0(INA3221_ADDR40_GND);
-
 const uint32_t calibration_millis = 5000;
-
 
 // Variable de estado
 char cmode;
@@ -44,7 +46,7 @@ void emergency_stop_callback()
 
 }
 
-// Configuración sensor
+
 void current_measure_init() {
     ina_0.begin(&Wire);
     ina_0.reset();
@@ -87,11 +89,15 @@ void setup()
 
   // Inicializamos los sensores
   digitalWrite(LED_BUILTIN, HIGH);
+  /*for (uint8_t i = 0; i < num_inas; i++) {
+    Robot::myINA ina0;
+    ina0 = Robot::myINA(INA3221_ADDR40_GND, 1);
+    ina[i] = &ina0;
+    ina[i] -> current_measure_init();
+  }*/
+  
   Wire.begin();
   current_measure_init();
-  /*sensor1.init();
-  sensor2.init();
-  sensor3.init();*/
 
   t = millis();
 
@@ -144,6 +150,13 @@ void loop()
     int buffer[NUM_VALVULAS + 1];
     switch (op)
     {
+
+    // decir si trabajamos con un robot real o ficticio
+    case 'i':
+      real_robot = Serial.parseInt();
+      Serial.print("HOlaaaaa");
+      break;
+
     // abrir valvula
     case 'a':
       num_valv = Serial.parseInt();
@@ -168,13 +181,6 @@ void loop()
       num_valv = Serial.parseInt();
       x = Serial.parseInt();
       misValvulas[num_valv]->fill_millis((uint16_t)x);
-      for (char i = 0; i < 10; i++) {
-        Serial.print(millis());
-        Serial.print(" ");
-        Serial.print(ina_0.getVoltage(INA3221_CH1));
-        Serial.print(" ");
-        Serial.println(millis());
-      }
       break;
 
     // vaciar durante x ms
@@ -182,14 +188,24 @@ void loop()
       num_valv = Serial.parseInt();
       x = Serial.parseInt();
       misValvulas[num_valv]->emptyng_millis((uint16_t)x);
-      for (char i = 0; i < 10; i++) {
-        Serial.print(millis());
-        Serial.print(" ");
-        Serial.print(ina_0.getVoltage(INA3221_CH1));
-        Serial.print(" ");
-        Serial.println(millis());
-      }
       break;
+
+    // Medir los valores de los sensores
+    case 'M':
+      if (real_robot) {
+        /*for (uint8_t i = 0; i < num_inas; i++) {
+          ina[i]->measure();
+        }*/
+        Serial.print(ina_0.getVoltage(INA3221_CH1));
+      } else {
+        for (uint8_t i = 0; i < NUM_VALVULAS; i++) {
+          int p = misValvulas[i]->get_actual_pressure();
+          Serial.print(9 + p * P_V_RATIO);
+          Serial.print(" ");
+        }
+      }
+      Serial.println(" ");
+    break;
 
     // Para escribir un dato para todas las valvulas en modo absoluto
     case 'w':
@@ -257,7 +273,7 @@ void loop()
 
       break;
 
-      // Para cambiar ratio inflado/ desinflado
+      // Para cambiar ratio inflado/desinflado
       case 'm':
         p = Serial.parseFloat();
         for (int i = 0; i < NUM_VALVULAS; i++)

@@ -8,13 +8,22 @@ classdef Robot < handle
 
     properties (Access = public)
         serialDevice;                       % Serial port to which Arduino is connected
+        realMode = 0;                       % 1 if working with the real robot
         deflatingTime = 1000;               % Default deflating time
         deflatingRatio = 1.4;               % Relation between deflation and inflation time
         nValves = 9;                        % Number of valves
-        nSensors = 3;                       % Number of sensors
+        nSensors = 1;                       % Number of sensors
+        base = [0 0 0];                     % Position of the centre of the basis (in cameras'coordinates)
+        bottom = [0 0 0];                   % Position of the centre of the bottom (in cameras'coordinates)
+        origin = zeros(4,3);                % Initial positions and orientation of red, green and blue dots
         millisSentToValves;                 % Milliseconds of air each valve has received
         voltages;                           % Voltages read using the INAs
-        serialData = '';
+        serialData = '';                    % Data received using the serial port
+
+        % Geometric parameters
+        geom;
+        trihDistance = 90;                  % Distance (mm) from the centre of the green ball to the centre of the bottom of the robot
+        segmLength = 90;                    % Length of a segment
 
         % Cameras
         cam_xz;
@@ -25,6 +34,7 @@ classdef Robot < handle
         dy = 0;
         dz = 0;
         z_offset = 0;
+        calOK;
         cam;                            % For auxiliar parameters
     end
 
@@ -90,6 +100,10 @@ classdef Robot < handle
     
             this.serialDevice = serialport(serial, freq);
             configureCallback(this.serialDevice, "terminator", @(varargin)this.ReadSerialData)
+
+            % Sending info of the robot
+            writeline(this.serialDevice, "i" + this.realMode);
+
         end
         
         %% Camera callibration and capture
@@ -150,9 +164,9 @@ classdef Robot < handle
             xz_b = findPoint(this.img_xz, 'b',"xz");
 
             % Coordinates of these points
-            this.cam.r = getCoordinates(yz_r,xz_r,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.cam.z_offset);
-            this.cam.g = getCoordinates(yz_g,xz_g,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.cam.z_offset);
-            this.cam.b = getCoordinates(yz_b,xz_b,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.cam.z_offset);
+            this.cam.r = getCoordinates(yz_r,xz_r,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
+            this.cam.g = getCoordinates(yz_g,xz_g,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
+            this.cam.b = getCoordinates(yz_b,xz_b,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
 
             % Plotting
             hold(this.cam.UIAxes_yz, 'on')
@@ -176,10 +190,14 @@ classdef Robot < handle
 
         end
 
-        function CapturePosition(this)
+        function pos = CapturePosition(this)
             % Capture pictures with the cameras and returns end tip
             % position.
             %
+            % pos = Robot.CapturePosition() Capture pictures with the
+            % cameras and returns matrix pos, which contains, by rows
+            % the position of the green, red and blue dots, the estimated
+            % position of the centre of the bottom and the Euler angles.
             
             % Take pictures with both cameras
             this.img_yz = snapshot(this.cam_yz);
@@ -245,6 +263,10 @@ classdef Robot < handle
 
             hold off
             hold off
+            
+            pos = [this.cam.g; this.cam.r; this.cam.b];
+            a = this.bottom + mean(pos - this.origin(1:3,:)) + [0 -this.trihDistance 0];
+            pos = [pos; a; euler];
 
         end
         
@@ -306,18 +328,33 @@ classdef Robot < handle
             
         end
 
-        function data = ReadSerialData(this)
-            % data = ReadSerialData() returns a Robot.nSensors x 1 array
+        function measurement = Measure(this)
+            % measurement = Robot.Measure() returns a Robot.nSensors x 1 array
             % containing the voltages read by Arduino.
-            % 
+            %
             % The values of data are also stored in the last column of
             % this.voltages array
+            
+            % Sending measure order
+            write(this.serialDevice, 'M', "char");
+
+            % Reading
+            measurement = readline(this.serialDevice);
+            disp(measurement)
+            measurement = split(measurement);
+            measurement = str2double(measurement);
+            this.voltages(:,end+1) = measurement(1:this.nSensors);
+        end
+
+        function data = ReadSerialData(this)
+            % Callback associated to the serial port specified in
+            % Robot.serialDevice
+            % 
+            % data = ReadSerialData() returns a string containing the data
+            % read by the serial port.
 
             data = readline(this.serialDevice);
-            disp(data)
-            this.serialData = [this.serialData;data];
-%             data = split(data);
-%             this.voltages(:,end+1) = str2double(data);
+            disp(data)           
         end
 
     end
