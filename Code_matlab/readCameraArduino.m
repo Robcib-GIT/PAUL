@@ -1,18 +1,23 @@
-%% Código para mandar al robot a distintas posiciones y, en ellas, leer la
-% cámara y los sensores
+%% Code to send the robot to different positions and, at these positions,
+% to read the camera and sensors
+% 
 % Jorge F. García-Samartín
 % www.gsamartin.es
 % 2023-05-16
 
-%% Configuración
-clear
-close all
-r = Robot();
-r.Connect();
-r.Deflate();
-disp('Desinflado')
+%% Setup
+% clear
+% close all
+% r = Robot();
+% r.Connect();
+% r.Deflate();
+% disp('Desinflado')
 
-%% Calibración
+nValv = 2;
+timeStep = 100;
+nCycles = round(900/timeStep);
+
+%% Callibration
 % r.WriteOneValveMillis(0, 400);
 % pause(2);
 % r.WriteOneValveMillis(0, -400);
@@ -26,18 +31,43 @@ disp('Desinflado')
 % r.WriteOneValveMillis(2, -400);
 % pause(1);
 
-%% Captura de datos
-r.CallibrateCameras();
-%r.SetZero();
+%% Data Capture
+%r.CallibrateCameras();
 
-% Posición inicial
-% r.origin = r.CapturePosition();
-% r.bottom = r.origin(1,:) + [0 -r.trihDistance 0];
-% r.base = r.bottom + [0 -r.segmLength 0];
-pos = r.CapturePosition();
-x = pos(4,:);
-x2 = r.R*x';
-[l,params] = MCI(x2, 40);
+r.ResetVoltagesPositions();
+r.Measure();
+r.CapturePosition();
+for i = 1:nCycles
+    r.WriteOneValveMillis(nValv, timeStep);
+    pause(1);
+    pos = r.CapturePosition();
+    pause(2);
+    r.Measure();
+end
+pause(5)
+for i = 1:nCycles
+    r.WriteOneValveMillis(nValv, -timeStep);
+    pause(1);
+    r.Measure();
+    pos = r.CapturePosition();
+end
 
-%% Desconexión
+positions = r.positions;
+voltages = r.voltages;
+
+%% Analysis
+positions2 = r.R * positions(1:3,:);
+
+l = zeros(size(positions2));
+l2 = zeros(size(positions2));
+for i = 1:size(positions2,2)
+    l(:,i) = MCI(positions2(:,i), r.geom.radius);
+    l2(:,i) = MCI(positions2(:,i), r.geom.radius, 5.8428);
+end
+
+fileName = "./Tools/JGS_ImagenesMedir/" + strrep(char(datetime), ":", "-") + ".mat";
+save(fileName, "voltages", "positions", "l");
+disp(fileName + " has been saved")
+
+%% Disconnexion
 %r.delete(); 

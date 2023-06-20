@@ -14,11 +14,11 @@ function [BW,maskedRGBImage] = imageThresholdBlue_xz(RGB)
 I = rgb2hsv(RGB);
 
 % Define thresholds for channel 1 based on histogram settings
-channel1Min = 0.2;
+channel1Min = 0.0;
 channel1Max = 1;
 
 % Define thresholds for channel 2 based on histogram settings
-channel2Min = 0.200;
+channel2Min = 0.000;
 channel2Max = 1.000;
 
 % Define thresholds for channel 3 based on histogram settings
@@ -79,8 +79,8 @@ end
 function polyBW = applyPolygons(J,polyBW)
 
 % Define each manually generated ROI
-hPoints(1).data = [-0.284567 -0.638491;
-    -0.734776 -0.663678;
+hPoints(1).data = [-0.184567 -0.638491;
+    -0.534776 -0.663678;
     -0.900006 -0.298466;
     -0.999310 -0.288392;
     -0.981786 -1.054077;

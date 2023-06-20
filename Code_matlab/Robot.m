@@ -8,21 +8,22 @@ classdef Robot < handle
 
     properties (Access = public)
         serialDevice;                       % Serial port to which Arduino is connected
-        realMode = 0;                       % 1 if working with the real robot
+        realMode = 1;                       % 1 if working with the real robot
         deflatingTime = 1000;               % Default deflating time
-        deflatingRatio = 1.4;               % Relation between deflation and inflation time
+        deflatingRatio = 1.7;               % Relation between deflation and inflation time
         nValves = 9;                        % Number of valves
-        nSensors = 1;                       % Number of sensors
+        nSensors = 3;                       % Number of sensors
         base = [0 0 0];                     % Position of the centre of the basis (in cameras'coordinates)
         bottom = [0 0 0];                   % Position of the centre of the bottom (in cameras'coordinates)
         origin = zeros(5,3);                % Initial positions and orientation of red, green and blue dots
         millisSentToValves;                 % Milliseconds of air each valve has received
         voltages;                           % Voltages read using the INAs
+        positions;                          % Positions read using the cameras
         serialData = '';                    % Data received using the serial port
 
         % Geometric parameters
         geom;
-        R = [1 0 0;0 0 -1;0 -1 0];          % Rotation matrix (from camera to our axes)
+        R = [1 0 0;0 0 1;0 -1 0];           % Rotation matrix (from camera to our axes)
 
         % Cameras
         cam_xz;
@@ -36,6 +37,10 @@ classdef Robot < handle
         calOK;
         zeroSet = false;
         cam;                            % For auxiliar parameters
+
+        % Position and lengths
+        x = zeros(6,1);
+        l = zeros(3,1);
     end
 
     methods
@@ -56,19 +61,15 @@ classdef Robot < handle
 
             this.millisSentToValves = zeros(1, this.nValves);
             this.voltages = zeros(this.nSensors, 1);
+            this.positions = zeros(6, 1);
 
             % Geometric parameters
             this.geom.trihDistance = 90;                    % Distance (mm) from the centre of the green ball to the centre of the bottom of the robot
             this.geom.segmLength = 90;                      % Length of a segment
-            this.geom.raidus = 40;                          % Radius of the sensors' circle
+            this.geom.radius = 40;                          % Radius of the sensors' circle
 
             % Camera representation
-            figure;
-            title('Images captured by the cameras')
-            this.cam.UIAxes_yz = subplot(1,2,1);
-            title(this.cam.UIAxes_yz,'CAM_YZ');
-            this.cam.UIAxes_xz = subplot(1,2,2);
-            title(this.cam.UIAxes_xz,'CAM_XZ');
+            this.MakeAxis();
         end
 
         function this = delete(this)
@@ -86,7 +87,7 @@ classdef Robot < handle
 
         %% Connection to Arduino
         function this = Connect(this, serial, freq)
-            % Stablish conexion with the Arduino using the serial port
+            % Stablish connexion with the Arduino using the serial port
             % 
             % Robot.Connect(serial, freq) connects to the serial port specified
             % in serial at frequency freq.
@@ -100,7 +101,7 @@ classdef Robot < handle
                     freq = 9600;
                 case 1
                     freq = 9600;
-                    serial = 'COM3';
+                    serial = 'COM6';
             end
     
             this.serialDevice = serialport(serial, freq);
@@ -110,8 +111,35 @@ classdef Robot < handle
             writeline(this.serialDevice, "i" + this.realMode);
 
         end
+
+        function this = Disconnect(this)
+            % Erase connexion with the Arduino
+            %
+            % Robot.Disconnect() clears the existent connection with the
+            % Arduino and returns Robot.serialDevice value to 0
+
+            delete(this.serialDevice)
+            disp("Connection has been removed")
+
+        end
         
         %% Camera callibration and capture
+        function MakeAxis(this)
+            % Creates a subplot with two axis, in where to show the images
+            % captured by the camera, in case of the default ones have been
+            % closed.
+            %
+            % Robot.MakeAxis() creates the suplot in where the images of
+            % the camera and the captured positions will be shown.
+            
+            figure;
+            title('Images captured by the cameras')
+            this.cam.UIAxes_yz = subplot(1,2,1);
+            title(this.cam.UIAxes_yz,'CAM_YZ');
+            this.cam.UIAxes_xz = subplot(1,2,2);
+            title(this.cam.UIAxes_xz,'CAM_XZ');
+        end
+
         function CallibrateCameras(this)
             % Calculates the extrinsic parameters of the cameras and loads
             % the intrinsic ones.
@@ -144,6 +172,7 @@ classdef Robot < handle
             this.cam.cameraParams_xz = tempX.cameraParams_xz;
             [this.cam.rotyz, this.cam.transyz] = findCameraPose(this.cam_yz, this.cam.cameraParams_yz);
             [this.cam.rotxz, this.cam.transxz] = findCameraPose(this.cam_xz, this.cam.cameraParams_xz);
+            disp('Snapshots have been taken')
             
             % Figure with cameras' position
             figure;
@@ -153,54 +182,12 @@ classdef Robot < handle
             hold off
         end
 
-%         function SetZero(this)
-%             % Transform rotation matrixes of the cameras to make the
-%             % original green dot the home position
-% 
-%             % Taking images with the cameras
-%             this.img_yz = snapshot(this.cam_yz);
-%             this.img_xz = snapshot(this.cam_xz);
-%             imshow(this.img_yz,'Parent',this.cam.UIAxes_yz);
-%             imshow(this.img_xz, 'Parent', this.cam.UIAxes_xz);
-%             
-%             % Searching for red, green and blue dots
-%             yz_r = findPoint(this.img_yz, 'o',"yz");
-%             yz_g = findPoint(this.img_yz, 'g',"yz");
-%             yz_b = findPoint(this.img_yz, 'b',"yz");
-%             xz_r = findPoint(this.img_xz, 'o',"xz");
-%             xz_g = findPoint(this.img_xz, 'g',"xz");
-%             xz_b = findPoint(this.img_xz, 'b',"xz");
-% 
-%             % Coordinates of these points
-%             this.cam.r = getCoordinates(yz_r,xz_r,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
-%             this.cam.g = getCoordinates(yz_g,xz_g,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
-%             this.cam.b = getCoordinates(yz_b,xz_b,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
-% 
-%             % Plotting
-%             hold(this.cam.UIAxes_yz, 'on')
-%             hold(this.cam.UIAxes_xz, 'on')
-%             plot(yz_g(1) ,yz_g(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','green');
-%             plot(xz_g(1), xz_g(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','green')
-%             plot(yz_b(1), yz_b(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','red');
-%             plot(xz_b(1), xz_b(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','red')
-%             plot(yz_r(1), yz_r(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','red');
-%             plot(xz_r(1), xz_r(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','red')
-%             plot([yz_b(1) yz_g(1)], [yz_b(2) yz_g(2)], 'g', 'Parent',this.cam.UIAxes_yz);
-%             plot([yz_b(1) yz_r(1)], [yz_b(2) yz_r(2)], 'g', 'Parent',this.cam.UIAxes_yz);
-%             plot([yz_g(1) yz_r(1)], [yz_g(2) yz_r(2)], 'g', 'Parent',this.cam.UIAxes_yz);
-%             plot([xz_b(1) xz_g(1)], [xz_b(2) xz_g(2)], 'g', 'Parent',this.cam.UIAxes_xz);
-%             plot([xz_b(1) xz_r(1)], [xz_b(2) xz_r(2)], 'g', 'Parent',this.cam.UIAxes_xz);
-%             plot([xz_g(1) xz_r(1)], [xz_g(2) xz_r(2)], 'g', 'Parent',this.cam.UIAxes_xz);
-%             
-%             this.dx = this.cam.g(1);
-%             this.dy = this.cam.g(2);
-%             this.dz = this.cam.g(3);
-% 
-%         end
-
-        function [pos2, pos] = CapturePosition(this)
+        function [pos2, pos, nattempts] = CapturePosition(this)
             % Capture pictures with the cameras and returns end tip
             % position.
+            % 
+            % The posiition of the centre of the bottom and the Euler
+            % angles are also stored in the last column of this.positions array
             %
             % pos = Robot.CapturePosition() Capture pictures with the
             % cameras and returns matrix pos, which contains, by rows
@@ -212,74 +199,93 @@ classdef Robot < handle
             % position expressed with respect to the cameras' reference
             % frame.
             
-            % Take pictures with both cameras
-            this.img_yz = snapshot(this.cam_yz);
-            this.img_xz = snapshot(this.cam_xz);
-            imshow(this.img_yz,'Parent',this.cam.UIAxes_yz);
-            imshow(this.img_xz, 'Parent', this.cam.UIAxes_xz);
-            
-            % Searching for red, green and blue dots in the images
-            yz_r = findPoint(this.img_yz, 'o',"yz");
-            yz_g = findPoint(this.img_yz, 'g',"yz");
-            yz_b = findPoint(this.img_yz, 'b',"yz");
-            xz_r = findPoint(this.img_xz, 'o',"xz");
-            xz_g = findPoint(this.img_xz, 'g',"xz");
-            xz_b = findPoint(this.img_xz, 'b',"xz");
+            nattempts = 0;
+            pos = [-1 -1 -1];
 
-            % Plotting
-            hold(this.cam.UIAxes_yz, 'on')
-            hold(this.cam.UIAxes_xz, 'on')
-            plot(yz_g(1) ,yz_g(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','green');
-            plot(xz_g(1), xz_g(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','green')
-            plot(yz_b(1), yz_b(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','red');
-            plot(xz_b(1), xz_b(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','red')
-            plot(yz_r(1), yz_r(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','red');
-            plot(xz_r(1), xz_r(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','red')
-            plot([yz_b(1) yz_g(1)], [yz_b(2) yz_g(2)], 'g', 'Parent',this.cam.UIAxes_yz);
-            plot([yz_b(1) yz_r(1)], [yz_b(2) yz_r(2)], 'g', 'Parent',this.cam.UIAxes_yz);
-            plot([yz_g(1) yz_r(1)], [yz_g(2) yz_r(2)], 'g', 'Parent',this.cam.UIAxes_yz);
-            plot([xz_b(1) xz_g(1)], [xz_b(2) xz_g(2)], 'g', 'Parent',this.cam.UIAxes_xz);
-            plot([xz_b(1) xz_r(1)], [xz_b(2) xz_r(2)], 'g', 'Parent',this.cam.UIAxes_xz);
-            plot([xz_g(1) xz_r(1)], [xz_g(2) xz_r(2)], 'g', 'Parent',this.cam.UIAxes_xz);
-             
-            this.cam.r = getCoordinates(yz_r,xz_r,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
-            this.cam.g = getCoordinates(yz_g,xz_g,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
-            this.cam.b = getCoordinates(yz_b,xz_b,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
-            
-            hold on
+            if ~isgraphics(this.cam.UIAxes_xz) || ~isgraphics(this.cam.UIAxes_yz)
+                this.MakeAxis();
+            end
 
-            [this.cam.rot_m, this.cam.euler_m] = getRotations(this.cam.r, this.cam.g, this.cam.b);
-            
-            % From rotation matrix to quaternion
-            quaternion = rotm2quat(this.cam.rot_m);
-            disp(quaternion);
-            hold(this.cam.UIAxes_yz, 'on');
+            while find(pos == [-1 -1 -1])
                 
-            % From rotation matrix to Euler angles
-            euler = rotm2eul(this.cam.rot_m);
+                nattempts = nattempts + 1;
 
-            hold(this.cam.UIAxes_yz, 'on');
+                % Take pictures with both cameras
+                this.img_yz = snapshot(this.cam_yz);
+                this.img_xz = snapshot(this.cam_xz);
+                imshow(this.img_yz,'Parent',this.cam.UIAxes_yz);
+                imshow(this.img_xz, 'Parent', this.cam.UIAxes_xz);
+                
+                % Searching for red, green and blue dots in the images
+                yz_r = findPoint(this.img_yz, 'o',"yz");
+                yz_g = findPoint(this.img_yz, 'g',"yz");
+                yz_b = findPoint(this.img_yz, 'b',"yz");
+                xz_r = findPoint(this.img_xz, 'o',"xz");
+                xz_g = findPoint(this.img_xz, 'g',"xz");
+                xz_b = findPoint(this.img_xz, 'b',"xz");
+    
+                % Plotting
+                hold(this.cam.UIAxes_yz, 'on')
+                hold(this.cam.UIAxes_xz, 'on')
+                plot(yz_g(1) ,yz_g(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','green');
+                plot(xz_g(1), xz_g(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','green')
+                plot(yz_b(1), yz_b(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','red');
+                plot(xz_b(1), xz_b(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','red')
+                plot(yz_r(1), yz_r(2), 'o', 'Parent',this.cam.UIAxes_yz, 'Color','red');
+                plot(xz_r(1), xz_r(2), 'o', 'Parent',this.cam.UIAxes_xz, 'Color','red')
+                plot([yz_b(1) yz_g(1)], [yz_b(2) yz_g(2)], 'g', 'Parent',this.cam.UIAxes_yz);
+                plot([yz_b(1) yz_r(1)], [yz_b(2) yz_r(2)], 'g', 'Parent',this.cam.UIAxes_yz);
+                plot([yz_g(1) yz_r(1)], [yz_g(2) yz_r(2)], 'g', 'Parent',this.cam.UIAxes_yz);
+                plot([xz_b(1) xz_g(1)], [xz_b(2) xz_g(2)], 'g', 'Parent',this.cam.UIAxes_xz);
+                plot([xz_b(1) xz_r(1)], [xz_b(2) xz_r(2)], 'g', 'Parent',this.cam.UIAxes_xz);
+                plot([xz_g(1) xz_r(1)], [xz_g(2) xz_r(2)], 'g', 'Parent',this.cam.UIAxes_xz);
+                 
+                this.cam.r = getCoordinates(yz_r,xz_r,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
+                this.cam.g = getCoordinates(yz_g,xz_g,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
+                this.cam.b = getCoordinates(yz_b,xz_b,this.cam.matyz, this.cam.matxz, this.dx, this.dy, this.dz, this.z_offset);
+                
+                hold on
+    
+                [this.cam.rot_m, this.cam.euler_m] = getRotations(this.cam.r, this.cam.g, this.cam.b);
+                
+                % From rotation matrix to quaternion
+                quaternion = rotm2quat(this.cam.rot_m);
+                disp(quaternion);
+                hold(this.cam.UIAxes_yz, 'on');
+                    
+                % From rotation matrix to Euler angles
+                euler = rotm2eul(this.cam.rot_m);
+    
+                hold(this.cam.UIAxes_yz, 'on');
+                
+                rv = [this.cam.r(1) - this.cam.g(1), this.cam.r(2) - this.cam.g(2), this.cam.r(3) - this.cam.g(3)];
+                bv = [this.cam.b(1) - this.cam.g(1), this.cam.b(2) - this.cam.g(2), this.cam.b(3) - this.cam.g(3)];
+                zv = cross(rv, bv);
+                rv = rv / norm(rv);
+                bv = bv / norm(bv);
+                zv = zv / norm(zv);
+    
+                quiver3(this.cam.g(1), this.cam.g(2), this.cam.g(3), rv(1), rv(2), rv(3), 'Parent', this.cam.UIAxes_yz, 'Color', 'red');
+                quiver3(this.cam.g(1), this.cam.g(2), this.cam.g(3), bv(1) , bv(2), bv(3), 'Parent', this.cam.UIAxes_yz, 'Color', 'blue');
+                quiver3(this.cam.g(1), this.cam.g(2), this.cam.g(3), zv(1) , zv(2), zv(3), 'Parent', this.cam.UIAxes_yz, 'Color', 'green');
+    
+                valuestr = "Green: " + num2str(this.cam.g(1)) + ", " + num2str(this.cam.g(2)) + ", " + num2str(this.cam.g(3)) + newline + "red: " + num2str(this.cam.r(1)) + ", " + num2str(this.cam.r(2)) + ", " + num2str(this.cam.r(3)) + newline + "blue: " + num2str(this.cam.b(1)) + ", " + num2str(this.cam.b(2)) + ", " + num2str(this.cam.b(3)) + newline + "euler: " + num2str(rad2deg(euler(1))) + ", " + num2str(rad2deg(euler(2))) + ", " + num2str(rad2deg(euler(3)))+   newline +    " dy = " + num2str(this.dy) + "" +  " dx = " + num2str(this.dx);
+                disp(valuestr);
+    
+                hold off
+                hold off  
+
+                pos = [this.cam.g; this.cam.r; this.cam.b];
             
-            rv = [this.cam.r(1) - this.cam.g(1), this.cam.r(2) - this.cam.g(2), this.cam.r(3) - this.cam.g(3)];
-            bv = [this.cam.b(1) - this.cam.g(1), this.cam.b(2) - this.cam.g(2), this.cam.b(3) - this.cam.g(3)];
-            zv = cross(rv, bv);
-            rv = rv / norm(rv);
-            bv = bv / norm(bv);
-            zv = zv / norm(zv);
+                % Warning
+                if nattempts > 10
+                    disp("10 attempts of capture have been done and failed")
+                    break
+                end
 
-            quiver3(this.cam.g(1), this.cam.g(2), this.cam.g(3), rv(1), rv(2), rv(3), 'Parent', this.cam.UIAxes_yz, 'Color', 'red');
-            quiver3(this.cam.g(1), this.cam.g(2), this.cam.g(3), bv(1) , bv(2), bv(3), 'Parent', this.cam.UIAxes_yz, 'Color', 'blue');
-            quiver3(this.cam.g(1), this.cam.g(2), this.cam.g(3), zv(1) , zv(2), zv(3), 'Parent', this.cam.UIAxes_yz, 'Color', 'green');
+            end
 
-            valuestr = "Green: " + num2str(this.cam.g(1)) + ", " + num2str(this.cam.g(2)) + ", " + num2str(this.cam.g(3)) + newline + "red: " + num2str(this.cam.r(1)) + ", " + num2str(this.cam.r(2)) + ", " + num2str(this.cam.r(3)) + newline + "blue: " + num2str(this.cam.b(1)) + ", " + num2str(this.cam.b(2)) + ", " + num2str(this.cam.b(3)) + newline + "euler: " + num2str(rad2deg(euler(1))) + ", " + num2str(rad2deg(euler(2))) + ", " + num2str(rad2deg(euler(3)))+   newline +    " dy = " + num2str(this.dy) + "" +  " dx = " + num2str(this.dx);
-            disp(valuestr);
-
-            hold off
-            hold off
-
-            % Coordinate system transformation            
-            pos = [this.cam.g; this.cam.r; this.cam.b];
-
+            % Coordinate system transformation 
             if (~this.zeroSet)
                 this.bottom = pos(1,:) + [0 -this.geom.trihDistance 0];
                 this.base = this.bottom + [0 -this.geom.segmLength 0];
@@ -287,9 +293,13 @@ classdef Robot < handle
                 this.zeroSet = true;
             end
 
+            %a = this.bottom + nanmean(removeOutliers(pos - this.origin(1:3,:)));
             a = this.bottom + mean(pos - this.origin(1:3,:));
             pos = [pos; a; euler];
             pos2 = [pos(1:4,:) - this.base; euler];
+
+            % Storing
+            this.positions(:,end+1) = [pos2(4,:) euler]';
 
         end
         
@@ -369,6 +379,15 @@ classdef Robot < handle
             this.voltages(:,end+1) = measurement(1:this.nSensors);
         end
 
+        function ResetVoltagesPositions(this)
+            % Reset the values of Robot.voltages and Robot.positions to
+            % default (Robot.voltages will be a nSensors x 1 array and
+            % Robot.positions, a 6 x 1 array)
+          
+            this.voltages = zeros(this.nSensors, 1);
+            this.positions = zeros(6, 1);
+        end
+
         function data = ReadSerialData(this)
             % Callback associated to the serial port specified in
             % Robot.serialDevice
@@ -378,6 +397,68 @@ classdef Robot < handle
 
             data = readline(this.serialDevice);
             disp(data)           
+        end
+
+        %% Sensor calibration
+        function CalibrateSensor(this, nSensor)
+        end
+
+        function Calibrate(this)
+        end
+
+        %% Kinematic modelling
+        function [l, params] = MCI (this, a, phi0)
+            % Calculate the inverse kinematic model of a three-wire robot 
+            % using the PCC method.
+            % 
+            % l = Robot.MCI() returns the lengths of the three wires of a
+            % robot, knowing the position of its end (x) and the diameter
+            % of the circumference they form (a). Orientation may or may
+            % not be included in x.
+            % 
+            % [l, params] = Robot.MCI() returns, in addition to the lengths
+            % of the wires, a structure with the values of lr (average
+            % length), phi (orientation) and kappa (curvature)
+            % 
+            % l = Robot.MCI(phi0) allows to rotate, counter-clockwise, an
+            % angle phi0 the robot reference system.
+            
+            % Initial setup
+            if ~nargin
+                phi0 = pi/2;
+            end
+            
+            a = this.geom.radius;
+            xP = this.x(1:3);
+        
+            % Dependent modelling
+            % General case
+            if (sum(xP(1:2) - [0 0]))
+                phi = atan2(xP(2),xP(1));
+                kappa = 2 * norm(xP(1:2)) / norm(xP)^2;
+                if xP(3) <= 0
+                    theta = acos(1 - kappa * norm(xP(1:2)));
+                else
+                    theta = 2*pi - acos(1 - kappa * norm(xP(1:2)));
+                end
+                theta2 = wrapToPi(theta);
+                lr = abs(theta2 / kappa);
+
+            % Singular configuration
+            else
+                phi = 0;    % Cualquier valor es posible
+                kappa = 0;
+                lr = xP(3);            
+            end
+        
+            params.lr = lr;
+            params.phi = phi;
+            params.kappa = kappa;
+        
+            %% Independent modelling
+            phi_i = phi0 + [pi pi/3 -pi/3];
+            l = lr * (1 + kappa*a*sin(phi + phi_i));
+            this.l = l;
         end
 
     end

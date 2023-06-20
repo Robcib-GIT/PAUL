@@ -11,13 +11,24 @@
 % una estructura con los valores de lr (longitud media), phi
 % (orientación) y kappa (curvatura)
 %
+% l = MCI(x, a, phi0) permite girar, en sentido antihorario, un ángulo phi0
+% el sistema de referencia del robot.
+%
 % Jorge F. García-Samartín
 % www.gsamartin.es
 % 2023-05-04
 
-function [l, params] = MCI(x, a)  
+function [l, params] = MCI(x, a, phi0)  
 
     %% Comprobaciones iniciales
+    switch nargin
+        case 2
+            phi0 = pi/2;
+        case 1
+            phi0 = pi/2;
+            a = 40;
+    end
+
     if length(x) < 3
         error("Introduce un vector de, al menos, tres longitudes")
     end
@@ -47,7 +58,7 @@ function [l, params] = MCI(x, a)
     params.kappa = kappa;
 
     %% Modelado independiente
-    phi_i = [pi pi/3 -pi/3];
+    phi_i = phi0 + [pi pi/3 -pi/3];
     l = lr * (1 + kappa*a*sin(phi + phi_i));
 
 end
