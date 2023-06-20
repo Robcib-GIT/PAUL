@@ -48,4 +48,5 @@ function [T, params] = MCD(l, a)
         T = [1 0 0 0; 0 1 0 0; 0 0 1 lr; 0 0 0 1];
     end
 
+    %[0 1 0;-1 0 0;0 0 -1]
 end

@@ -22,6 +22,7 @@ function A = removeOutliers(A, th)
         for j = 1:length(u)
             if u(j) > th
                 A(i,j) = NaN;
+                %disp("Outlier en " + i + ", " + j)
             end
         end
     end
