@@ -43,6 +43,10 @@ classdef Robot < handle
         l = zeros(3,1);
     end
 
+    events
+        NewMeasure
+    end
+
     methods
         %% Constructor and destructor
         function this = Robot(nValves)
@@ -70,6 +74,10 @@ classdef Robot < handle
 
             % Camera representation
             this.MakeAxis();
+
+            % Measure callback
+            addlistener(this, 'NewMeasure', @(~,~) this.CallbackMeasurement);
+            
         end
 
         function this = delete(this)
@@ -366,17 +374,41 @@ classdef Robot < handle
             % containing the voltages read by Arduino.
             %
             % The values of data are also stored in the last column of
-            % this.voltages array
+            % this.voltages array-
+            % 
+            % Measurement is done by time blocking. If no answer is given
+            % after 500ms, process is aborted.
             
             % Sending measure order
             write(this.serialDevice, 'M', "char");
 
             % Reading
-            measurement = readline(this.serialDevice);
-            disp(measurement)
-            measurement = split(measurement);
-            measurement = str2double(measurement);
-            this.voltages(:,end+1) = measurement(1:this.nSensors);
+%             t1 = datetime("now");
+%             t2 = t1;
+%             while this.serialType ~= 'M' && seconds(t2 - t1) < 5
+%             end
+%             while seconds(t2 - t1) < 0.5
+%                 a = this.serialType;
+%                 if this.serialType == 'M'
+%                     measurement = this.serialData;
+%                     break
+%                 end
+%                 t2 = datetime("now");
+%             end
+%             if seconds(t2 - t1) >= 0.5
+%                 disp("After 500ms, no measurement is available");
+%             end
+%             measurement = this.serialData;
+%             measurement = split(measurement);
+%             measurement = str2double(measurement);
+%             this.voltages(:,end+1) = measurement(2:1+this.nSensors);
+        end
+
+        function CallbackMeasurement(this)
+            % Callback associated to the mesure
+            %
+            % Robot.CallbackMeasurement split the measures received 
+            disp('Cambio de valor')
         end
 
         function ResetVoltagesPositions(this)
@@ -392,11 +424,18 @@ classdef Robot < handle
             % Callback associated to the serial port specified in
             % Robot.serialDevice
             % 
-            % data = ReadSerialData() returns a string containing the data
+            % data = Robot.ReadSerialData() returns a string containing the data
             % read by the serial port.
 
             data = readline(this.serialDevice);
-            disp(data)           
+            this.serialData = data;
+            dataChar = char(data);
+            disp(data)
+
+            switch dataChar(1)
+                case 'M'
+                    notifiy(this, 'NewMeasure');
+            end
         end
 
         %% Sensor calibration
