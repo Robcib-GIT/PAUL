@@ -20,6 +20,7 @@ classdef Robot < handle
         voltages;                           % Voltages read using the INAs
         positions;                          % Positions read using the cameras
         serialData = '';                    % Data received using the serial port
+        matrix_tV;
 
         % Geometric parameters
         geom;
@@ -376,6 +377,12 @@ classdef Robot < handle
             disp(measurement)
             measurement = split(measurement);
             measurement = str2double(measurement);
+            disp(measurement)
+            if ~isnan(measurement(2))
+                measurement = measurement(2:4);
+            else 
+                measurement = [0 0 0];
+            end
             this.voltages(:,end+1) = measurement(1:this.nSensors);
         end
 
@@ -401,9 +408,29 @@ classdef Robot < handle
 
         %% Sensor calibration
         function CalibrateSensor(this, nSensor)
+            aux = zeros(1,9);
+
+            for i = 1:9
+                this.WriteOneValveMillis(nSensor,100);
+                pause(0.1)
+                mes = this.Measure();
+                aux(1,i) = mes(1,nSensor+1);
+            end
+
+            this.Deflate();
+
+            if ~nSensor 
+                this.matrix_tV = aux;
+            else 
+                this.matrix_tV = [this.matrix_tV; aux];
+            end
+
         end
 
         function Calibrate(this)
+            for k = 0:2
+                this.CalibrateSensor(k);
+            end
         end
 
         %% Kinematic modelling
