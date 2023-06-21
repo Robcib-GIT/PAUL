@@ -12,7 +12,7 @@ classdef Robot < handle
         deflatingTime = 1000;               % Default deflating time
         deflatingRatio = 1.7;               % Relation between deflation and inflation time
         nValves = 9;                        % Number of valves
-        nSensors = 1;                       % Number of sensors
+        nSensors = 3;                       % Number of sensors
         base = [0 0 0];                     % Position of the centre of the basis (in cameras'coordinates)
         bottom = [0 0 0];                   % Position of the centre of the bottom (in cameras'coordinates)
         origin = zeros(5,3);                % Initial positions and orientation of red, green and blue dots
@@ -38,7 +38,12 @@ classdef Robot < handle
         zeroSet = false;
         cam;                            % For auxiliar parameters
 
-        % Pos
+        % Position and lengths
+        x = zeros(6,1);
+        l = zeros(3,1);
+    end
+
+    properties (SetObservable)
     end
 
     methods
@@ -364,17 +369,41 @@ classdef Robot < handle
             % containing the voltages read by Arduino.
             %
             % The values of data are also stored in the last column of
-            % this.voltages array
+            % this.voltages array-
+            % 
+            % Measurement is done by time blocking. If no answer is given
+            % after 500ms, process is aborted.
             
             % Sending measure order
             write(this.serialDevice, 'M', "char");
 
             % Reading
-            measurement = readline(this.serialDevice);
-            disp(measurement)
-            measurement = split(measurement);
-            measurement = str2double(measurement);
-            this.voltages(:,end+1) = measurement(1:this.nSensors);
+%             t1 = datetime("now");
+%             t2 = t1;
+%             while this.serialType ~= 'M' && seconds(t2 - t1) < 5
+%             end
+%             while seconds(t2 - t1) < 0.5
+%                 a = this.serialType;
+%                 if this.serialType == 'M'
+%                     measurement = this.serialData;
+%                     break
+%                 end
+%                 t2 = datetime("now");
+%             end
+%             if seconds(t2 - t1) >= 0.5
+%                 disp("After 500ms, no measurement is available");
+%             end
+%             measurement = this.serialData;
+%             measurement = split(measurement);
+%             measurement = str2double(measurement);
+%             this.voltages(:,end+1) = measurement(2:1+this.nSensors);
+        end
+
+        function CallbackMeasurement(this)
+            % Callback associated to the mesure
+            %
+            % Robot.CallbackMeasurement split the measures received 
+            disp('Cambio de valor')
         end
 
         function ResetVoltagesPositions(this)
@@ -390,18 +419,28 @@ classdef Robot < handle
             % Callback associated to the serial port specified in
             % Robot.serialDevice
             % 
-            % data = ReadSerialData() returns a string containing the data
+            % data = Robot.ReadSerialData() returns a string containing the data
             % read by the serial port.
 
             data = readline(this.serialDevice);
-            disp(data)           
+            this.serialData = data;
+            dataChar = char(data);
+            disp(data)
+
+            switch dataChar(1)
+                case 'M'
+                    measurement = this.serialData;
+                    measurement = split(measurement);
+                    measurement = str2double(measurement);
+                    this.voltages(:,end+1) = measurement(2:1+this.nSensors);
+            end
         end
 
         %% Sensor calibration
-        function CallibrateSensor(this, nSensor)
+        function CalibrateSensor(this, nSensor)
         end
 
-        function Callibrate(this)
+        function Calibrate(this)
         end
 
         %% Kinematic modelling
@@ -426,18 +465,18 @@ classdef Robot < handle
                 phi0 = pi/2;
             end
             
-            a = this.geom.
-            x = x(1:3);
+            a = this.geom.radius;
+            xP = this.x(1:3);
         
             % Dependent modelling
             % General case
-            if (sum(x(1:2) - [0 0]))
-                phi = atan2(x(2),x(1));
-                kappa = 2 * norm(x(1:2)) / norm(x)^2;
-                if x(3) <= 0
-                    theta = acos(1 - kappa * norm(x(1:2)));
+            if (sum(xP(1:2) - [0 0]))
+                phi = atan2(xP(2),xP(1));
+                kappa = 2 * norm(xP(1:2)) / norm(xP)^2;
+                if xP(3) <= 0
+                    theta = acos(1 - kappa * norm(xP(1:2)));
                 else
-                    theta = 2*pi - acos(1 - kappa * norm(x(1:2)));
+                    theta = 2*pi - acos(1 - kappa * norm(xP(1:2)));
                 end
                 theta2 = wrapToPi(theta);
                 lr = abs(theta2 / kappa);
@@ -446,7 +485,7 @@ classdef Robot < handle
             else
                 phi = 0;    % Cualquier valor es posible
                 kappa = 0;
-                lr = x(3);            
+                lr = xP(3);            
             end
         
             params.lr = lr;
@@ -456,6 +495,7 @@ classdef Robot < handle
             %% Independent modelling
             phi_i = phi0 + [pi pi/3 -pi/3];
             l = lr * (1 + kappa*a*sin(phi + phi_i));
+            this.l = l;
         end
 
     end
