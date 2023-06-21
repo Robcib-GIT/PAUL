@@ -15,8 +15,8 @@ ina3221_addr_t addresses[num_inas] = {INA3221_ADDR40_GND};
 
 INA3221 ina_0(INA3221_ADDR40_GND);
 
-// Si se trabaja con robot real o con modelo
-uint8_t real_robot = 1;
+// Si se trabaja con robot real o con modelo (el dato lo manda Matlab, aunque por seguridad se dice que modelo)
+uint8_t real_robot = 0;
 const float length_constant = 0.05;
 
 // Modo normal
@@ -57,10 +57,10 @@ void setup()
 {
 
   // Comunicacion con el PC
-  Serial.begin(9600);
+  Serial3.begin(9600);
 
   // Comunicacion con ESP32 (Interfaz wifi para desarollo)
-  Serial2.begin(9600);
+  //Serial2.begin(9600);
   
   // Inicializamos los pines de la marca de la vision por omputador
   pinMode(PIN_LED_R, OUTPUT);
@@ -111,17 +111,17 @@ void setup()
   */
   digitalWrite(LED_BUILTIN, LOW);
 
-  // Se imprimen por serial los valores calibrados de los sensores
-  /*Serial.print(sensor1.getMaxCalibratedValue());
-  Serial.print(" ");
-  Serial.println(sensor1.getMinCalibratedValue());
-  Serial.print(sensor2.getMaxCalibratedValue());
-  Serial.print(" ");
-  Serial.println(sensor2.getMinCalibratedValue());
-  Serial.print(sensor3.getMaxCalibratedValue());
-  Serial.print(" ");
-  Serial.println(sensor3.getMinCalibratedValue());*/
-  Serial.println("Calibration done");
+  // Se imprimen por Serial los valores calibrados de los sensores
+  /*Serial3.print(sensor1.getMaxCalibratedValue());
+  Serial3.print(" ");
+  Serial3.println(sensor1.getMinCalibratedValue());
+  Serial3.print(sensor2.getMaxCalibratedValue());
+  Serial3.print(" ");
+  Serial3.println(sensor2.getMinCalibratedValue());
+  Serial3.print(sensor3.getMaxCalibratedValue());
+  Serial3.print(" ");
+  Serial3.println(sensor3.getMinCalibratedValue());*/
+  Serial3.println("Calibration done");
 
   t = millis();
 
@@ -136,14 +136,11 @@ void loop()
   {
   
   t1 = millis();
-  /*Serial.print(t1 - t);
-  Serial.print(" ");
-  Serial.println(x);*/
 
-  if (Serial.available() > 0)
+  if (Serial3.available() > 0)
   {
     static char op = ' ';
-    op = Serial.read();
+    op = Serial3.read();
     int num_valv;
     //int x;
     float p;
@@ -153,58 +150,63 @@ void loop()
 
     // decir si trabajamos con un robot real o ficticio
     case 'i':
-      real_robot = Serial.parseInt();
-      Serial.print("HOlaaaaa");
+      real_robot = Serial3.parseInt();
+      Serial3.println("Working mode changed");
       break;
 
     // abrir valvula
     case 'a':
-      num_valv = Serial.parseInt();
-      Serial.println(num_valv);
+      num_valv = Serial3.parseInt();
+      Serial3.println(num_valv);
       misValvulas[num_valv]->alAire();
       break;
 
     // cerrar valvula
     case 'b':
-      num_valv = Serial.parseInt();
+      num_valv = Serial3.parseInt();
       misValvulas[num_valv]->Cerrada();
       break;
 
     // a presion
     case 'c':
-      num_valv = Serial.parseInt();
+      num_valv = Serial3.parseInt();
       misValvulas[num_valv]->Presion();
       break;
 
     // llenar durante x ms
     case 'f':
-      num_valv = Serial.parseInt();
-      x = Serial.parseInt();
+      num_valv = Serial3.parseInt();
+      x = Serial3.parseInt();
       misValvulas[num_valv]->fill_millis((uint16_t)x);
       break;
 
     // vaciar durante x ms
     case 'e':
-      num_valv = Serial.parseInt();
-      x = Serial.parseInt();
+      num_valv = Serial3.parseInt();
+      x = Serial3.parseInt();
       misValvulas[num_valv]->emptyng_millis((uint16_t)x);
       break;
 
     // Medir los valores de los sensores
     case 'M':
+      Serial3.print("M ");
       if (real_robot) {
         /*for (uint8_t i = 0; i < num_inas; i++) {
           ina[i]->measure();
         }*/
-        Serial.print(ina_0.getVoltage(INA3221_CH1));
+        Serial3.print(ina_0.getVoltage(INA3221_CH1));
+        Serial3.print(" ");
+        Serial3.print(ina_0.getVoltage(INA3221_CH2));
+        Serial3.print(" ");
+        Serial3.println(ina_0.getVoltage(INA3221_CH3));
       } else {
         for (uint8_t i = 0; i < NUM_VALVULAS; i++) {
           int p = misValvulas[i]->get_actual_pressure();
-          Serial.print(9 + p * P_V_RATIO);
-          Serial.print(" ");
+          Serial3.print(9 + p * P_V_RATIO);
+          Serial3.print(" ");
         }
       }
-      Serial.println(" ");
+      Serial3.println(" ");
     break;
 
     // Para escribir un dato para todas las valvulas en modo absoluto
@@ -212,7 +214,7 @@ void loop()
     
       for (int i = 0; i < NUM_VALVULAS + 1; i++)
       {
-        buffer[i] =  Serial.parseInt();
+        buffer[i] =  Serial3.parseInt();
       }
 
       for (int i = 1; i < NUM_VALVULAS + 1; i++)
@@ -241,8 +243,8 @@ void loop()
       case 'V':
         
         // rgb
-        num_valv = Serial.parseInt();
-        x = Serial.parseInt();
+        num_valv = Serial3.parseInt();
+        x = Serial3.parseInt();
         switch(num_valv)
         {
           // r
@@ -265,7 +267,7 @@ void loop()
 
       // Para cambiar la presion maxima en modo relativo
       case 'l':
-        p = Serial.parseFloat();
+        p = Serial3.parseFloat();
         for (int i = 0; i < NUM_VALVULAS; i++)
         {
           misValvulas[i] ->  set_max_rel_pressure(p);
@@ -275,7 +277,7 @@ void loop()
 
       // Para cambiar ratio inflado/desinflado
       case 'm':
-        p = Serial.parseFloat();
+        p = Serial3.parseFloat();
         for (int i = 0; i < NUM_VALVULAS; i++)
         {
           misValvulas[i] ->  set_mult(p);
@@ -285,8 +287,8 @@ void loop()
 
     // Modo relativo en una sola valvula
     case 'x':
-      num_valv = Serial.parseInt();
-      x = Serial.parseInt();
+      num_valv = Serial3.parseInt();
+      x = Serial3.parseInt();
       misValvulas[num_valv]->relC(x);
       break;
 
@@ -294,11 +296,11 @@ void loop()
       
       for(int i = 0; i < NUM_VALVULAS; i++)
       {
-        int pres = Serial.parseInt();
+        int pres = Serial3.parseInt();
         misValvulas[i]->relC( pres);
-        Serial.print(i);
-        Serial.print(" ");
-        Serial.println(pres);
+        Serial3.print(i);
+        Serial3.print(" ");
+        Serial3.println(pres);
 
         delay(2);
       }
@@ -317,12 +319,12 @@ void loop()
   }
 
   // Comunicacion con ESP32
-  if (Serial2.available() > 0)
+  /*if (Serial2.available() > 0)
   {
 
     static char op = ' ';
-    op = Serial.read();
-    Serial.println(op);
+    op = Serial3.read();
+    Serial3.println(op);
     int num_valv;
 
     switch (op)
@@ -330,7 +332,7 @@ void loop()
     // abrir valvula
     case 'a':
       num_valv = Serial2.parseInt();
-      Serial.println(num_valv);
+      Serial3.println(num_valv);
       misValvulas[num_valv]->alAire();
       break;
 
@@ -346,7 +348,7 @@ void loop()
       misValvulas[num_valv]->Presion();
       break;
     }
-  }
+  }*/
 
   
   // Comprobamos si alguna valvula ha entrado en modo de parada de emergencia
@@ -371,9 +373,9 @@ void loop()
     digitalWrite(13, !digitalRead(13));
     delay(100);
 
-    if( Serial.available() > 0)
+    if( Serial3.available() > 0)
     {
-      char op = Serial.read();
+      char op = Serial3.read();
 
       // Rearmamos
       if(op == 'R')
