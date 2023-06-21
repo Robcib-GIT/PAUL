@@ -8,11 +8,11 @@ clear
 close all
 
 %% Configuración
-Vobj = 8.5;
-tol = 1e-5;
+Vobj = 12;
+tol = 1e-2;
 niter = 0;
 error = 1e12;
-maxAction = 400;
+maxAction = 100;
 T = NaT(150, 1);
 A = zeros(150);
 
@@ -33,13 +33,15 @@ while abs(error) > tol && niter < 150
     else
         action = max(K*error, -maxAction);
     end
-    r.WriteOneValveMillis(0, action);
+    r.WriteOneValveMillis(2, action);
     A(niter) = action;
     T(niter) = datetime('now');
 
     % Medida
-    r.Measure()
-    error = r.voltages(1,end) - Vobj;
+    r.Measure();
+    pause(0.03);
+    r.voltages(3,end)
+    error = r.voltages(3,end) - Vobj;
 end
 
 T1 = seconds(T-Tor) * 1000;

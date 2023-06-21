@@ -111,8 +111,7 @@ classdef Robot < handle
                     freq = 9600;
                 case 1
                     freq = 9600;
-                    slist = serialportlist();
-                    serial = slist(1);
+                    serial = 'COM6';
             end
     
             this.serialDevice = serialport(serial, freq);
@@ -472,14 +471,14 @@ classdef Robot < handle
                 this.CalibrateSensor(k);
             end
 
-%             for i = 1:3
-%                 this.max_min(i,1) = max(this.matrix_tV(i,:));
-%                 this.max_min(i,2) = min(this.matrix_tV(i,:));
-%                 
-%                 for j = 1:length(this.matrix_tV(i,:))
-%                     this.matrix_tV(i,j) = (this.matrix_tV(i,j) - this.max_min(i,2)) * 100 / (this.max_min(i,1) - this.max_min(i,2));
-%                 end
-%             end
+            for i = 1:3
+                this.max_min(i,1) = this.matrix_tV(i,:);
+                this.max_min(i,2) = min(this.matrix_tV(i,:));
+
+                for j = 1:length(this.matrix_tV(i,:))
+                    this.matrix_tV(i,j) = (this.matrix_tV(i,j) - this.max_min(i,2)) * 100 / (this.max_min(i,1) - this.max_min(i,2));
+                end
+            end
 
             disp(this.matrix_tV)
         end
