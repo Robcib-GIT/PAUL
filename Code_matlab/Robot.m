@@ -9,7 +9,7 @@ classdef Robot < handle
     properties (Access = public)
         serialDevice;                       % Serial port to which Arduino is connected
         realMode = 1;                       % 1 if working with the real robot
-        deflatingTime = 1000;               % Default deflating time
+        deflatingTime = 1200;               % Default deflating time
         deflatingRatio = 1.7;               % Relation between deflation and inflation time
         nValves = 9;                        % Number of valves
         nSensors = 3;                       % Number of sensors
@@ -20,6 +20,8 @@ classdef Robot < handle
         voltages;                           % Voltages read using the INAs
         positions;                          % Positions read using the cameras
         serialData = '';                    % Data received using the serial port
+        matrix_tV;
+        max_min;
 
         % Geometric parameters
         geom;
@@ -109,7 +111,8 @@ classdef Robot < handle
                     freq = 9600;
                 case 1
                     freq = 9600;
-                    serial = 'COM6';
+                    slist = serialportlist();
+                    serial = slist(1);
             end
     
             this.serialDevice = serialport(serial, freq);
@@ -319,7 +322,7 @@ classdef Robot < handle
 
             deflateMillis = "w,1";
             for i = 1:this.nValves
-                deflateMillis = strcat(deflateMillis, ",-", int2str(this.deflatingTime));
+                deflateMillis = strcat(deflateMillis, ",-", int2str(this.deflatingTime * this.deflatingRatio));
             end
             writeline(this.serialDevice, deflateMillis);
 
@@ -369,7 +372,7 @@ classdef Robot < handle
             
         end
 
-        function measurement = Measure(this)
+        function Measure(this)
             % measurement = Robot.Measure() returns a Robot.nSensors x 1 array
             % containing the voltages read by Arduino.
             %
@@ -408,7 +411,11 @@ classdef Robot < handle
             % Callback associated to the mesure
             %
             % Robot.CallbackMeasurement split the measures received 
-            disp('Cambio de valor')
+            measurement = this.serialData;
+            measurement = split(measurement);
+            measurement = str2double(measurement);
+            measurement = measurement(2:1+this.nSensors);
+            this.voltages(:,end+1) = measurement;
         end
 
         function ResetVoltagesPositions(this)
@@ -430,19 +437,51 @@ classdef Robot < handle
             data = readline(this.serialDevice);
             this.serialData = data;
             dataChar = char(data);
-            disp(data)
 
             switch dataChar(1)
                 case 'M'
-                    notifiy(this, 'NewMeasure');
+                    notify(this, 'NewMeasure');
             end
         end
 
         %% Sensor calibration
         function CalibrateSensor(this, nSensor)
+            aux = zeros(1,9);
+
+            for i = 1:20
+                this.WriteOneValveMillis(nSensor,70);
+                pause(0.3)
+                this.Measure();
+                mes = this.voltages(:,end);
+                aux(1,i) = mes(nSensor+1,1);
+            end
+
+            this.Deflate();
+
+            if ~nSensor 
+                this.matrix_tV = aux;
+            else 
+                this.matrix_tV = [this.matrix_tV; aux];
+            end
+
         end
 
         function Calibrate(this)
+
+            for k = 0:2
+                this.CalibrateSensor(k);
+            end
+
+%             for i = 1:3
+%                 this.max_min(i,1) = max(this.matrix_tV(i,:));
+%                 this.max_min(i,2) = min(this.matrix_tV(i,:));
+%                 
+%                 for j = 1:length(this.matrix_tV(i,:))
+%                     this.matrix_tV(i,j) = (this.matrix_tV(i,j) - this.max_min(i,2)) * 100 / (this.max_min(i,1) - this.max_min(i,2));
+%                 end
+%             end
+
+            disp(this.matrix_tV)
         end
 
         %% Kinematic modelling
