@@ -440,9 +440,29 @@ classdef Robot < handle
 
         %% Sensor calibration
         function CalibrateSensor(this, nSensor)
+            aux = zeros(1,9);
+
+            for i = 1:9
+                this.WriteOneValveMillis(nSensor,100);
+                pause(0.1)
+                mes = this.Measure();
+                aux(1,i) = mes(1,nSensor+1);
+            end
+
+            this.Deflate();
+
+            if ~nSensor 
+                this.matrix_tV = aux;
+            else 
+                this.matrix_tV = [this.matrix_tV; aux];
+            end
+
         end
 
         function Calibrate(this)
+            for k = 0:2
+                this.CalibrateSensor(k);
+            end
         end
 
         %% Kinematic modelling
