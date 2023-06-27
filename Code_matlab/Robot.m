@@ -11,6 +11,7 @@ classdef Robot < handle
         realMode = 1;                       % 1 if working with the real robot
         deflatingTime = 1200;               % Default deflating time
         deflatingRatio = 1.7;               % Relation between deflation and inflation time
+        maxAction = 500;
         nValves = 9;                        % Number of valves
         nSensors = 3;                       % Number of sensors
         base = [0 0 0];                     % Position of the centre of the basis (in cameras'coordinates)
@@ -22,6 +23,8 @@ classdef Robot < handle
         serialData = '';                    % Data received using the serial port
         matrix_tV;
         max_min;
+        p_t2v;
+        p_v2t;
 
         % Geometric parameters
         geom;
@@ -73,6 +76,7 @@ classdef Robot < handle
             this.geom.trihDistance = 90;                    % Distance (mm) from the centre of the green ball to the centre of the bottom of the robot
             this.geom.segmLength = 90;                      % Length of a segment
             this.geom.radius = 40;                          % Radius of the sensors' circle
+            this.geom.phi0 = pi/2;
 
             % Camera representation
             this.MakeAxis();
@@ -345,6 +349,12 @@ classdef Robot < handle
 
             this.millisSentToValves(valv+1) = this.millisSentToValves(valv+1) + millis;
         end
+
+        function WriteSegmentMillis(this, millis)
+            for i = 0:2
+                this.WriteOneValveMillis(i,millis(i+1));
+            end
+        end
         
         %% Reading valve state and sensors
         function millis = GetMillisSent(this)
@@ -446,14 +456,17 @@ classdef Robot < handle
 
         %% Sensor calibration
         function CalibrateSensor(this, nSensor)
-            aux = zeros(1,9);
+            aux = zeros(1,21);
+            this.Measure();
+            mes = this.voltages(:,end);
+            aux(1,1) = mes(nSensor+1,1);
 
             for i = 1:20
                 this.WriteOneValveMillis(nSensor,70);
                 pause(0.3)
                 this.Measure();
                 mes = this.voltages(:,end);
-                aux(1,i) = mes(nSensor+1,1);
+                aux(1,i+1) = mes(nSensor+1,1);
             end
 
             this.Deflate();
@@ -472,20 +485,29 @@ classdef Robot < handle
                 this.CalibrateSensor(k);
             end
 
-%             for i = 1:3
-%                 this.max_min(i,1) = max(this.matrix_tV(i,:));
-%                 this.max_min(i,2) = min(this.matrix_tV(i,:));
-%                 
-%                 for j = 1:length(this.matrix_tV(i,:))
-%                     this.matrix_tV(i,j) = (this.matrix_tV(i,j) - this.max_min(i,2)) * 100 / (this.max_min(i,1) - this.max_min(i,2));
-%                 end
-%             end
+            for i = 1:3
+                this.max_min(i,1) = max(this.matrix_tV(i,:));
+                this.max_min(i,2) = min(this.matrix_tV(i,:));
+                
+                for j = 1:length(this.matrix_tV(i,:))
+                    this.matrix_tV(i,j) = (this.matrix_tV(i,j) - this.max_min(i,2)) * 100 / (this.max_min(i,1) - this.max_min(i,2));
+                end
+            end
+            
+            b = 0:70:70*20;
 
-            disp(this.matrix_tV)
+            this.p_t2v(1,:) = polyfit(b,this.matrix_tV(1,:),3);
+            this.p_t2v(2,:) = polyfit(b,this.matrix_tV(2,:),3);
+            this.p_t2v(3,:) = polyfit(b,this.matrix_tV(3,:),3);
+
+            this.p_v2t(1,:) = polyfit(this.matrix_tV(1,:),b,3);
+            this.p_v2t(2,:) = polyfit(this.matrix_tV(2,:),b,3);
+            this.p_v2t(3,:) = polyfit(this.matrix_tV(3,:),b,3);
+
         end
 
         %% Kinematic modelling
-        function [l, params] = MCI (this, a, phi0)
+        function [l, params] = MCI(this, xP, phi0, a)
             % Calculate the inverse kinematic model of a three-wire robot 
             % using the PCC method.
             % 
@@ -502,12 +524,21 @@ classdef Robot < handle
             % angle phi0 the robot reference system.
             
             % Initial setup
-            if ~nargin
-                phi0 = pi/2;
+            switch nargin
+                case 1 
+                    xP = this.x(1:3);
+                    phi0 = pi/2;
+                    a = this.geom.phi0;
+                
+                case 2
+                    phi0 = this.geom.phi0;
+                    a = this.geom.radius;
+
+                case 3
+                    a = this.geom.radius;
+                    
             end
             
-            a = this.geom.radius;
-            xP = this.x(1:3);
         
             % Dependent modelling
             % General case
@@ -537,6 +568,98 @@ classdef Robot < handle
             phi_i = phi0 + [pi pi/3 -pi/3];
             l = lr * (1 + kappa*a*sin(phi + phi_i));
             this.l = l;
+        end
+
+        
+        function [T, params] = MCD(this, l, a)  
+            
+            % Calcula el modelo cinemático directo de un robot de tres cables
+            % utilizando el método PCC.
+            %
+            % T = MCD(l, a) devuelve la matriz de transformación homogénea que permite
+            % pasar de la base al extremo del robot, conocidas las longtiudes de sus
+            % cables (l) y el diámetro de la circunferencia que forman (a).
+            % 
+            % [T, params] = MCD(l, a) devuelve, además de la matriz de transformación
+            % homogénea, una estructura con los valores de lr (longitud media), phi
+            % (orientación) y kappa (curvatura).
+            
+            % Comprobaciones iniciales
+            if length(l) ~= 3
+                error("Introduce un vector de tres longitudes")
+            end
+
+            if nargin == 2
+                a = this.geom.radius;
+            end
+        
+            % Modelado dependiente
+            % Caso general
+            if ~all(l == l(1))
+                lr = mean(l);
+                phi = atan2(sqrt(3) * (-2*l(1) + l(2) + l(3)), 3 * (l(2) - l(3)));
+                kappa = 2 * sqrt(l(1)^2 + l(2)^2 + l(3)^2 - l(1)*l(2) - l(3)*l(2) - l(1)*l(3)) / a / (l(1) + l(2) + l(3));
+            % Posición singular
+            else
+                lr = l(1);
+                phi = 0;
+                kappa = 0;
+            end
+        
+            params.lr = lr;
+            params.phi = phi;
+            params.kappa = kappa;
+        
+            % Modelado independiente
+            if ~all(l == l(1))
+                Trot = [cos(phi) -sin(phi) 0 0; sin(phi) cos(phi) 0 0; 0 0 1 0; 0 0 0 1];
+                Tarc = [cos(kappa*lr) 0 sin(kappa*lr) (1-cos(kappa*lr))/kappa; 0 1 0 0; -sin(kappa*lr) 0 cos(kappa*lr) sin(kappa*lr)/kappa; 0 0 0 1];
+                T = Trot*Tarc;
+            else
+                T = [1 0 0 0; 0 1 0 0; 0 0 1 lr; 0 0 0 1];
+            end
+        
+        end
+
+        function v = Transform_l2v(this, l)
+            
+        end
+
+        function t = Transform_v2t(this, v)
+            t = zeros(1,3);
+            for i = 1:3
+                t(i) = polyval(this.p_v2t(i), v);
+            end
+        end
+
+
+        %% Control of a single segment
+        function Control(this, x)
+
+            action = zeros(1,3);
+
+            if length(x) ~= 3
+                error("Introduce un punto en el espacio (3 componentes)")
+            end
+
+            [l_obj, ~] = this.MCI(x);
+            v_obj = this.Transform_l2v(l_obj);
+            t_obj = this.Transform_v2t(v_obj);
+
+            t = this.Measure_t();
+
+            err = t-t_obj;
+            
+            for i = 1:3
+                if err(i) > 0 
+                    action(i) = min(err(i), this.maxAction);
+                else
+                    action(i) = max(err(i), -this.maxAction);
+                end
+            end
+            
+            this.WriteSegmentMillis(action);
+
         end
 
     end
