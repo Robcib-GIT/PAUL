@@ -73,7 +73,7 @@ classdef Robot < handle
             this.positions = zeros(6, 1);
 
             % Geometric parameters
-            this.geom.trihDistance = 90;                    % Distance (mm) from the centre of the green ball to the centre of the bottom of the robot
+            this.geom.trihDistance = 77;                    % Distance (mm) from the centre of the green ball to the centre of the bottom of the robot
             this.geom.segmLength = 90;                      % Length of a segment
             this.geom.radius = 40;                          % Radius of the sensors' circle
             this.geom.phi0 = pi/2;
@@ -97,6 +97,10 @@ classdef Robot < handle
             for i = length(p)
                 delete(p{i});
             end
+        end
+
+        function vol = getVoltages(this)
+            vol = this.voltages(:,end);
         end
 
         %% Connection to Arduino
@@ -155,7 +159,7 @@ classdef Robot < handle
             title(this.cam.UIAxes_xz,'CAM_XZ');
         end
 
-        function CallibrateCameras(this)
+        function CalibrateCameras(this)
             % Calculates the extrinsic parameters of the cameras and loads
             % the intrinsic ones.
             %
@@ -197,7 +201,7 @@ classdef Robot < handle
             hold off
         end
 
-        function [pos2, pos, nattempts] = CapturePosition(this)
+        function [pos_rel, pos_fixed, nattempts] = CapturePosition(this)
             % Capture pictures with the cameras and returns end tip
             % position.
             % 
@@ -290,7 +294,8 @@ classdef Robot < handle
                 hold off
                 hold off  
 
-                pos = [this.cam.g; this.cam.r; this.cam.b];
+%                 pos = [this.cam.g; this.cam.r; this.cam.b];
+                pos = this.cam.g;
             
                 % Warning
                 if nattempts > 10
@@ -309,12 +314,12 @@ classdef Robot < handle
             end
 
             %a = this.bottom + nanmean(removeOutliers(pos - this.origin(1:3,:)));
-            a = this.bottom + mean(pos - this.origin(1:3,:));
-            pos = [pos; a; euler];
-            pos2 = [pos(1:4,:) - this.base; euler];
+            a = this.bottom + (pos - this.origin(1,:));
+            pos_fixed = [pos; a; euler];
+            pos_rel = [pos_fixed(1:2,:) - this.base; euler];
 
             % Storing
-            this.positions(:,end+1) = [pos2(4,:) euler]';
+            this.positions(:,end+1) = [pos_rel(4,:) euler]';
 
         end
         
