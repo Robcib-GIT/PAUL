@@ -16,7 +16,8 @@ for sens = 1:r.nSensors
     for j = 1:9
         r.WriteOneValveMillis(sens-1, 100);
         pause(1);
-
+        
+        % Calculates lengths at 400 and 900ms
         if j == 4 || j == 9
             s = round(j/4);
             pos = r.CapturePosition();
@@ -27,7 +28,8 @@ for sens = 1:r.nSensors
         pause(2);
         r.Measure();
         pause(1);
-
+        
+        % Measure voltages at 400 and 900ms
         if j == 4 || j == 9 
             voltages(sens,s) = r.voltages(sens,end);
         end
@@ -37,7 +39,7 @@ end
 % Data processing
 mL = (voltages(:,2) - voltages(:,1)) / (lengths(:,2) - lengths(:,1));
 
-%% Transformation
+%% Transformation (to check if result is correct)
 pos2v([0 0 90], mL, voltages(:,1))
 
 %% Aux Functions
