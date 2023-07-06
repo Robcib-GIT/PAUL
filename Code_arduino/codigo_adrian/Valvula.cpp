@@ -63,6 +63,8 @@ void Valvula::fill_millis_private(uint32_t time)
     // MS que se quieren alcanzar
     final_time = time;
 
+    control_time = millis();
+
     state = S_FILLING;
     
 
@@ -76,6 +78,7 @@ void Valvula::emptyng_millis_private(uint32_t time)
     timing_active = true;
     first_time = millis();
     final_time = time;
+    control_time = millis();
 
     state = S_EMPTYING;
     
@@ -94,14 +97,14 @@ void Valvula::callback()
     }
 
     // Para el control de seguridad
-    static int first = millis();
+    //static int first = millis();
 
     // Controlamos el estado de la presion actual.
     // Si se esta llenando o vaciando, se va actualizando cada 10ms
     if(state == S_FILLING || state == S_EMPTYING)
     {
         // Si esta en un estado distinto de cerrado durante mas de 10ms
-        if(millis() - first > 10)
+        if(millis() - control_time >= 10)
         {
             if(state == S_FILLING)
             {
@@ -109,11 +112,11 @@ void Valvula::callback()
             }
             else if(state == S_EMPTYING)
             {
-                actual_pressure -= this->comp_eq_empt_millis(10);
+                actual_pressure -= 10;
                 if(actual_pressure < 0) actual_pressure = 0;
             }
-
-            first = millis();
+            
+            control_time = millis();
         }
     }
 
