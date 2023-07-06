@@ -52,6 +52,7 @@ class Valvula
             
             uint32_t first_time;
             uint32_t final_time;
+            uint32_t control_time;
 
 
             bool emergency_halted;
@@ -67,7 +68,7 @@ class Valvula
 
             // Desinflado de seguridad
             void security_emptyng();
-
+            
             void fill_millis_private(uint32_t);
             void emptyng_millis_private(uint32_t);
 

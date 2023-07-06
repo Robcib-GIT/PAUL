@@ -9,7 +9,7 @@ classdef Robot < handle
     properties (Access = public)
         serialDevice;                       % Serial port to which Arduino is connected
         realMode = 1;                       % 1 if working with the real robot
-        deflatingTime = 1200;               % Default deflating time
+        deflatingTime = 1500;               % Default deflating time
         deflatingRatio = 1.7;               % Relation between deflation and inflation time
         maxAction = 500;
         nValves = 9;                        % Number of valves
@@ -140,6 +140,10 @@ classdef Robot < handle
             delete(this.serialDevice)
             disp("Connection has been removed")
 
+        end
+
+        function Rearme(this)
+            writeline(this.serialDevice, 'R');
         end
         
         %% Camera callibration and capture
@@ -319,7 +323,7 @@ classdef Robot < handle
             pos_rel = [pos_fixed(1:2,:) - this.base; euler];
 
             % Storing
-            this.positions(:,end+1) = [pos_rel(4,:) euler]';
+            this.positions(:,end+1) = [pos_rel(2,:) euler]';
 
         end
         
