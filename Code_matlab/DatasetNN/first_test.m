@@ -3,6 +3,9 @@
 % www.gsamartin.es
 % 2023-07-11
 
+close all;
+clear;
+
 % Loading and extracting the real data
 load('prueba_3.mat')
 vol2 = vol(1:300,:);
@@ -19,6 +22,7 @@ pos3 = pos2*r.R;
 
 % Getting state-space model
 data = iddata(pos2, vol2, 1.25);
-imp = impulseest(data);
+imp = impulseest(data, 4);
+figure;
 step(imp);
 ss = ssest(data);
