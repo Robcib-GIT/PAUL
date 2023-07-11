@@ -18,7 +18,7 @@ pos3 = pos2*r.R;
 % end
 
 % Getting state-space model
-data = iddata(pos2, vol2, 125);
+data = iddata(pos2, vol2, 1.25);
 imp = impulseest(data);
 step(imp);
 ss = ssest(data);
