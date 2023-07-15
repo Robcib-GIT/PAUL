@@ -10,7 +10,7 @@ classdef Robot < handle
         serialDevice;                       % Serial port to which Arduino is connected
         realMode = 1;                       % 1 if working with the real robot
         deflatingTime = 1500;               % Default deflating time
-        deflatingRatio = 1.75;               % Relation between deflation and inflation time
+        deflatingRatio = 1.7;               % Relation between deflation and inflation time
         maxAction = 500;
         max_millis = 1000;
         nValves = 9;                        % Number of valves
@@ -356,7 +356,7 @@ classdef Robot < handle
             if millis > 0
                 writeline(this.serialDevice, "f," + int2str(valv) + "," + int2str(millis));
             else
-                writeline(this.serialDevice, "e," + int2str(valv) + "," + int2str(-millis * this.deflatingRatio));
+                writeline(this.serialDevice, "e" + int2str(valv) + "," + int2str(-millis));
             end
 
             this.millisSentToValves(valv+1) = this.millisSentToValves(valv+1) + millis;
