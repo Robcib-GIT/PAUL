@@ -471,7 +471,7 @@ classdef Robot < handle
 
             this.Measure
             pause(0.05)
-            this.max_min(3,1) = this.voltages(3,end);
+            this.max_min(nSensor+1,1) = this.voltages(nSensor+1,end);
 
             this.WriteOneValveMillis(nSensor, this.max_millis);
             pause(4)

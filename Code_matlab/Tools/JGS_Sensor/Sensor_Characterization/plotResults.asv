@@ -7,8 +7,9 @@
 close all
 
 %% Configuración
-inicio = 1;
-fin = 3;
+inicio = 19;
+fin = 23;
+condsAll = [];
 datosAll = [];
 deltaAll = [];
 
@@ -19,8 +20,10 @@ files = {resDir.name};
 %% Cargamos los resultados que queremos
 for i = inicio:fin
     load(strcat(dirName, '/', files{i+2}));
-    datosAll = [datosAll; datos(datos)];
-    deltaAll = [deltaAll; delta_x];
+    condsAll = [condsAll; conds];
+    datosAll = [datosAll; datos(datos~=-1)];
+    deltaAll = [deltaAll; delta_x(delta_x~=-1)];
+    leg{end+1} = '';
 end
 
 %% Dibujado
@@ -31,10 +34,12 @@ hold on;
 for i = 1:size(datosAll, 1)
     plot(datosAll(i,525:1018));
 end
+legend(condsAll(:,1))
 
 % Histéresis
 figure;
 hold on;
 for i = 1:size(datosAll, 1)
-    plot(deltaAll(i,525:1018), datosAll(i,525:10));
+    plot(deltaAll(i,525:1018), datosAll(i,525:1018));
 end
+legend(condsAll(:,1))
