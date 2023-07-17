@@ -69,7 +69,7 @@ for i = 1:N_ITER_MAX
     vol(i,:) = vol_raw';
 
     if ~mod(i,SAVE)
-        save(strcat('DatasetNN/prueba2_',num2str(i/SAVE)),'pos','vol','t','prueba');
+        save(strcat('DatasetNN/prueba5_',num2str(i/SAVE)),'pos','vol','t','prueba');
     end
 
 end

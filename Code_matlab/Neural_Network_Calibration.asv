@@ -1,5 +1,5 @@
 MAX_MILLIS = 1000;
-N_ITER_MAX = 5000;
+N_ITER_MAX = 1000;
 SAVE = 100;
 
 pos = zeros(N_ITER_MAX,3);
@@ -54,7 +54,7 @@ for i = 1:N_ITER_MAX
     
 
     R.WriteSegmentMillis(t(i,:));
-    pause(3 * MAX_MILLIS / 1000)
+    pause(2.5 * MAX_MILLIS / 1000)
     R.Measure();
     pause(0.05)
 
@@ -69,7 +69,7 @@ for i = 1:N_ITER_MAX
     vol(i,:) = vol_raw';
 
     if ~mod(i,SAVE)
-        save(strcat('DatasetNN/prueba2_',num2str(i/SAVE)),'pos','vol','t','prueba');
+        save(strcat('DatasetNN/prueba5_',num2str(i/SAVE)),'pos','vol','t','prueba');
     end
 
 end
