@@ -1,4 +1,4 @@
-%% Dibujar los resultados de las medidas del sensor con el motor paso a paso
+% Dibujar los resultados de las medidas del sensor con el motor paso a paso
 %
 % Jorge F. García-Samartín
 % www.gsamartin.es
@@ -21,6 +21,7 @@ resDir = dir(dirName);
 files = {resDir.name};
 
 %% Cargamos los resultados que queremos
+
 for i = selectedData
     load(strcat(dirName, '/', files{i+2}));
     condsAll = [condsAll; conds];
@@ -42,7 +43,6 @@ leg1.Title.String = 'Temperatura (ºC)';
 xlabel('Pasos motor')
 ylabel('Tensión (V)')
 title('Evolución de la tensión en el sensor')
-
 
 % Histéresis
 figure;
