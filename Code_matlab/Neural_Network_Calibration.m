@@ -11,7 +11,7 @@ millis_ant = [0 0 0];
 
 prueba = zeros(N_ITER_MAX,3);
 
-%R.Calibrate();
+R.Calibrate();
 
 for i = 1:N_ITER_MAX
    
