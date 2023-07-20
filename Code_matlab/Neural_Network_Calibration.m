@@ -8,16 +8,18 @@ t = zeros(N_ITER_MAX,3);
 suma = zeros(1,3);
 millis_ant = [0 0 0];
 
-
 prueba = zeros(N_ITER_MAX,3);
 
-R.Calibrate();
+% R.Calibrate();
+% 
+% R.WriteSegmentMillis(prueba(358,:));
+% suma = prueba(358,:);
 
 for i = 1:N_ITER_MAX
    
     while 1
 
-        t(i,:) = -MAX_MILLIS -20 + 20*randi(fix((2*MAX_MILLIS/20 + 1)), [1 3]);
+        t(i,:) = -MAX_MILLIS -50 + 50*randi(fix((2*MAX_MILLIS/50 + 1)), [1 3]);
     
         if i == 1
             suma = t(i,:);
@@ -54,22 +56,23 @@ for i = 1:N_ITER_MAX
     
 
     R.WriteSegmentMillis(t(i,:));
-    pause(2.5 * MAX_MILLIS / 1000)
+    pause(4 * MAX_MILLIS / 1000)
     R.Measure();
-    pause(0.05)
-
-    vol_raw = R.getVoltages();
-    
-    for n = 1:3
-        vol_raw(n) = 100.0000 - (vol_raw(n) - R.max_min(n,1)) * 100.0000 / (R.max_min(n,2) - R.max_min(n,1));
+    for u = 1:100000000
     end
-
+    
     pos_raw = R.CapturePosition();
+    vol_raw = R.getVoltages();
+        
+%     for n = 1:3
+%         vol_raw(n) = 100.0000 - (vol_raw(n) - R.max_min(n,1)) * 100.0000 / (R.max_min(n,2) - R.max_min(n,1));
+%     end
+
     pos(i,:) = pos_raw(2,:);
     vol(i,:) = vol_raw';
 
     if ~mod(i,SAVE)
-        save(strcat('DatasetNN/prueba5_',num2str(i/SAVE)),'pos','vol','t','prueba');
+        save(strcat('DatasetNN/prueba_BUENA_2_',num2str(i/SAVE)),'pos','vol','t','prueba');
     end
 
 end
