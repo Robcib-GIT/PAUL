@@ -1,21 +1,21 @@
-MAX_MILLIS = 1000;
-N_ITER_MAX = 1000;
-SAVE = 100;
-
-%pos = zeros(N_ITER_MAX,3);
-%vol = zeros(N_ITER_MAX,3);
-%t = zeros(N_ITER_MAX,3);
-%suma = zeros(1,3);
-%millis_ant = [0 0 0];
-
+% MAX_MILLIS = 1000;
+% N_ITER_MAX = 1000;
+% SAVE = 100;
+% 
+% pos = zeros(N_ITER_MAX,3);
+% vol = zeros(N_ITER_MAX,3);
+% t = zeros(N_ITER_MAX,3);
+% suma = zeros(1,3);
+% millis_ant = [0 0 0];
+% 
 % prueba = zeros(N_ITER_MAX,3);
 
 % R.Calibrate();
-% 
-R.WriteSegmentMillis(prueba(762,:));
-suma = prueba(762,:);
 
-for i = 763:N_ITER_MAX
+R.WriteSegmentMillis(prueba(590,:));
+suma = prueba(590,:);
+
+for i = 591:N_ITER_MAX
    
     while 1
 
