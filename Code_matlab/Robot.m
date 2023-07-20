@@ -10,7 +10,7 @@ classdef Robot < handle
         serialDevice;                       % Serial port to which Arduino is connected
         realMode = 1;                       % 1 if working with the real robot
         deflatingTime = 1500;               % Default deflating time
-        deflatingRatio = 1.77;               % Relation between deflation and inflation time
+        deflatingRatio = 2.5;               % Relation between deflation and inflation time
         maxAction = 500;
         max_millis = 1000;
         nValves = 9;                        % Number of valves
@@ -25,8 +25,11 @@ classdef Robot < handle
         matrix_tV;
         max_min;
         volts;
-        p_t2v;
-        p_v2t;
+        tol = 1e-2;
+        net;
+        K_p = 0;
+        K_i = 0;
+        K_d = 0;
 
         % Geometric parameters
         geom;
@@ -434,6 +437,7 @@ classdef Robot < handle
             %
             % Robot.CallbackMeasurement split the measures received 
             measurement = this.serialData;
+            disp(measurement);
             measurement = split(measurement);
             measurement = str2double(measurement);
             measurement = measurement(2:1+this.nSensors);
@@ -470,13 +474,15 @@ classdef Robot < handle
         function CalibrateSensor(this, nSensor)
 
             this.Measure
-            pause(0.05)
+            for i = 1:100000000
+            end
             this.max_min(3,1) = this.voltages(3,end);
 
             this.WriteOneValveMillis(nSensor, this.max_millis);
             pause(4)
             this.Measure
-            pause(0.05)
+            for i = 1:100000000
+            end
             this.max_min(nSensor + 1,2) = this.voltages(nSensor + 1,end);
             this.Deflate();
 
@@ -605,45 +611,82 @@ classdef Robot < handle
         
         end
 
-        function v = Transform_l2v(this, l)
-            
+        %% Neural Network
+        function perform = NN_trainning(this, pos, volt, capas)
+            n = fix(0.95*length(pos));
+
+            this.net = feedforwardnet(capas);
+            this.net = train(this.net,pos(1:n,:)',volt(1:n,:)');
+
+            out = this.net(pos(n+1:end,:)');
+            perform = perf(this.net,volt(n+1:end,:)',out);
         end
 
-        function t = Transform_v2t(this, v)
-            t = zeros(1,3);
-            for i = 1:3
-                t(i) = polyval(this.p_v2t(i), v);
-            end
+        function NN_creation(this, network)
+            this.net = network;
         end
 
 
         %% Control of a single segment
-        function Control(this, x)
-
+        function Move(this, x)
+            
+            niter = 0;
             action = zeros(1,3);
 
             if length(x) ~= 3
-                error("Introduce un punto en el espacio (3 componentes)")
+                errordlg("Introduce un punto en el espacio (vector fila de 3 componentes)","Execution Error");
+                return
             end
 
-            [l_obj, ~] = this.MCI(x);
-            v_obj = this.Transform_l2v(l_obj);
-            t_obj = this.Transform_v2t(v_obj);
+            this.Measure();
+            for i = 1:100000000
+            end
+            vol_current = this.getVoltages();
 
-            t = this.Measure_t();
+            v_obj = this.net(x);
 
-            err = t-t_obj;
+            err = vol_current - v_obj;
             
-            for i = 1:3
-                if err(i) > 0 
-                    action(i) = min(err(i), this.maxAction);
-                else
-                    action(i) = max(err(i), -this.maxAction);
+            while abs(err) > this.tol && niter < 150
+                niter = niter + 1;
+
+                for i = 1:3
+                    if err(i) > 0 
+                        action(i) = min(err(i), this.maxAction);
+                    else
+                        action(i) = max(err(i), -this.maxAction);
+                    end
                 end
-            end
             
-            this.WriteSegmentMillis(action);
+                this.WriteSegmentMillis(action);
 
+                this.Measure();
+                for i = 1:100000000 
+                end
+                vol_current = this.getVoltages();
+                err = vol_current - v_obj;
+            end
+
+        end
+
+
+        function SetPID(this, K)
+            n = length(K);
+
+            switch n
+                case 1
+                    this.K_p = K(1);
+                case 2
+                    this.K_p = K(1);
+                    this.K_i = K(2);
+                case 3
+                    this.K_p = K(1);
+                    this.K_i = K(2);
+                    this.K_d = K(3);
+                otherwise
+                    errordlg("Introduce un punto en el espacio (vector fila de 3 componentes)","Execution Error");
+                    return
+            end
         end
 
     end
