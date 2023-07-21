@@ -25,9 +25,13 @@ switch dataset
         %t2 = [t2; t(1:435,:)];
         prueba2 = [prueba2; prueba(1:435,:)];
     case 2
-        load('./NN/datos_seg_2.mat')
-        vol2 = voltage(:,1:434)';
-        pos2 = position(:,1:434)';
+%         load('./NN/datos_seg_2.mat')
+%         vol2 = voltage(:,1:434)';
+%         pos2 = position(:,1:434)';
+
+        load('./NN/datos_seg_2_2.mat')
+        vol2 = voltage(:,435:end)';
+        pos2 = position(:,435:end)';
 end
 
 % Normalising
@@ -52,12 +56,12 @@ end
 % Training the net
 switch netType
     case 1
-        net = feedforwardnet([50]);
+        net = feedforwardnet(125);
         net.name = 'PAUL';
         [net, tr] = train(net, pos2(1:end-10,:)', vol2(1:end-10,:)');
     case 2
         numFeatures = 3;
-        numHiddenUnits = 50;
+        numHiddenUnits = 100;
         numResponses = 3;
         
         layers = [ ...
@@ -68,7 +72,7 @@ switch netType
 
         options = trainingOptions('adam', ...
             'ExecutionEnvironment','cpu', ...
-            'MaxEpochs',300, ...
+            'MaxEpochs',450, ...
             'MiniBatchSize',50, ...
             'GradientThreshold',1, ...
             'Verbose',false, ...
@@ -86,6 +90,7 @@ switch netType
             error(i) = norm(res - vol2(end - i,:));
         end
     case 2
+        res =zeros(10,1);
         for i = 1:10
             [~, res] = predictAndUpdateState(net,pos3(end - i)); 
             error(i) = norm(res - vol2(end - i,:));
@@ -93,4 +98,4 @@ switch netType
 end           
 
 disp(mean(error))
-disp(mean(error)*sigmaP + muP)
+disp(mean(error)*mean(voltage, 2))
