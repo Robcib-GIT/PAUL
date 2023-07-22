@@ -45,11 +45,16 @@ pos2 = (pos2 - muP) ./ sigmaP;
 
 if netType == 2
     pos3 = {};
-    pos3{1} = [0 0 0; 0 0 0; pos2(1,:)]';
-    pos3{2} = [0 0 0; pos2(1,:); pos2(2,:)]';
+%     pos3{1} = [0 0 0; 0 0 0; pos2(1,:)]';
+%     pos3{2} = [0 0 0; pos2(1,:); pos2(2,:)]';
+% 
+%     for i = 3:size(pos2)
+%         pos3{i} = [pos2(i-2,:); pos2(i-1,:); pos2(i,:)]';
+%     end
+    pos3{1} = [0 -77 0; pos2(1,:)]';
 
-    for i = 3:size(pos2)
-        pos3{i} = [pos2(i-2,:); pos2(i-1,:); pos2(i,:)]';
+    for i = 2:size(pos2)
+        pos3{i} = [pos2(i-1,:); pos2(i,:)]';
     end
 end
 
@@ -61,7 +66,7 @@ switch netType
         [net, tr] = train(net, pos2(1:end-10,:)', vol2(1:end-10,:)');
     case 2
         numFeatures = 3;
-        numHiddenUnits = 100;
+        numHiddenUnits = 50;
         numResponses = 3;
         
         layers = [ ...
@@ -72,7 +77,7 @@ switch netType
 
         options = trainingOptions('adam', ...
             'ExecutionEnvironment','cpu', ...
-            'MaxEpochs',450, ...
+            'MaxEpochs',200, ...
             'MiniBatchSize',50, ...
             'GradientThreshold',1, ...
             'Verbose',false, ...
