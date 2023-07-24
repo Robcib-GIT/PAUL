@@ -7,7 +7,7 @@ close all;
 clear;
 
 % Setup
-dataset = 2;
+dataset = 3;
 netType = 2;
 
 % Loading and extracting the real data
@@ -32,6 +32,11 @@ switch dataset
         load('./NN/datos_seg_2_2.mat')
         vol2 = voltage(:,435:end)';
         pos2 = position(:,435:end)';
+
+    case 3
+        load('prueba_DEF_def.mat')
+        vol2 = vol(1:end,:);
+        pos2 = pos(1:end,:);
 end
 
 % Normalising
@@ -77,7 +82,7 @@ switch netType
 
         options = trainingOptions('adam', ...
             'ExecutionEnvironment','cpu', ...
-            'MaxEpochs',200, ...
+            'MaxEpochs',700, ...
             'MiniBatchSize',50, ...
             'GradientThreshold',1, ...
             'Verbose',false, ...
@@ -103,4 +108,4 @@ switch netType
 end           
 
 disp(mean(error))
-disp(mean(error)*mean(voltage, 2))
+disp(mean(error)*mean(vol))
