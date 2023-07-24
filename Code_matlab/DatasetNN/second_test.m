@@ -25,9 +25,13 @@ switch dataset
         %t2 = [t2; t(1:435,:)];
         prueba2 = [prueba2; prueba(1:435,:)];
     case 2
-        load('./NN/datos_seg_2.mat')
-        vol2 = voltage(:,1:434)';
-        pos2 = position(:,1:434)';
+%         load('./NN/datos_seg_2.mat')
+%         vol2 = voltage(:,1:434)';
+%         pos2 = position(:,1:434)';
+
+        load('./NN/datos_seg_2_2.mat')
+        vol2 = voltage(:,435:end)';
+        pos2 = position(:,435:end)';
 end
 
 % Normalising
@@ -41,18 +45,23 @@ pos2 = (pos2 - muP) ./ sigmaP;
 
 if netType == 2
     pos3 = {};
-    pos3{1} = [0 0 0; 0 0 0; pos2(1,:)]';
-    pos3{2} = [0 0 0; pos2(1,:); pos2(2,:)]';
+%     pos3{1} = [0 0 0; 0 0 0; pos2(1,:)]';
+%     pos3{2} = [0 0 0; pos2(1,:); pos2(2,:)]';
+% 
+%     for i = 3:size(pos2)
+%         pos3{i} = [pos2(i-2,:); pos2(i-1,:); pos2(i,:)]';
+%     end
+    pos3{1} = [0 -77 0; pos2(1,:)]';
 
-    for i = 3:size(pos2)
-        pos3{i} = [pos2(i-2,:); pos2(i-1,:); pos2(i,:)]';
+    for i = 2:size(pos2)
+        pos3{i} = [pos2(i-1,:); pos2(i,:)]';
     end
 end
 
 % Training the net
 switch netType
     case 1
-        net = feedforwardnet([50]);
+        net = feedforwardnet(125);
         net.name = 'PAUL';
         [net, tr] = train(net, pos2(1:end-10,:)', vol2(1:end-10,:)');
     case 2
@@ -68,7 +77,7 @@ switch netType
 
         options = trainingOptions('adam', ...
             'ExecutionEnvironment','cpu', ...
-            'MaxEpochs',300, ...
+            'MaxEpochs',200, ...
             'MiniBatchSize',50, ...
             'GradientThreshold',1, ...
             'Verbose',false, ...
@@ -86,6 +95,7 @@ switch netType
             error(i) = norm(res - vol2(end - i,:));
         end
     case 2
+        res =zeros(10,1);
         for i = 1:10
             [~, res] = predictAndUpdateState(net,pos3(end - i)); 
             error(i) = norm(res - vol2(end - i,:));
@@ -93,4 +103,4 @@ switch netType
 end           
 
 disp(mean(error))
-disp(mean(error)*sigmaP + muP)
+disp(mean(error)*mean(voltage, 2))
