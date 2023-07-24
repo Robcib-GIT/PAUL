@@ -1,7 +1,7 @@
-% MAX_MILLIS = 900;
-N_ITER_MAX = 1027;
-% SAVE = 100;
-% RESET = 200;
+MAX_MILLIS = 900;
+N_ITER_MAX = 2000;
+SAVE = 100;
+RESET = 200;
 % 
 % pos = zeros(N_ITER_MAX,3);
 % vol = zeros(N_ITER_MAX,3);
@@ -20,7 +20,7 @@ for i = 973:N_ITER_MAX
    
     while 1
 
-        t(i,:) = -50 + 50*randi(fix((MAX_MILLIS/50 + 1)), [1 3]);
+        t(i,:) = -25 + 25*randi(fix((MAX_MILLIS/25 + 1)), [1 3]);
     
         indice = find(t(i,:) == min(t(i,:)));
     
@@ -52,13 +52,5 @@ for i = 973:N_ITER_MAX
     
     R.Deflate();
     pause(1)
-
-    if ~mod(i,RESET)
-        R.Disconnect;
-        R.ResetVoltagesPositions;
-        pause(0.5)
-        R.Connect;
-        pause(0.5)
-    end
 
 end
