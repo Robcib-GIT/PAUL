@@ -672,16 +672,16 @@ classdef Robot < handle
         function Move_vol(this, v)
             
             niter = 0;
-            k_error = [400 -30 -60; -80 450 -60; -70 -30 400];
-            accion_max = 300;
-            toler = 3e-1;
+            action = zeros(1,3);
+            k_error = 500;
+            accion_max = [];
 
             if length(v) ~= 3
                 errordlg("Introduce un vector de voltages objetivo (vector fila de 3 componentes)","Execution Error");
                 return
             end
 
-            v_obj = v';
+            v_obj = v;
             
             while 1
                 
@@ -690,35 +690,27 @@ classdef Robot < handle
                 this.Measure();
                 for i = 1:100000000
                 end
-                vol_current = this.getVoltages();
+                vol_current = (this.getVoltages())';
                 err = vol_current - v_obj;
 
-                if (abs(err(1)) <= toler && abs(err(2)) <= toler && abs(err(3)) <= toler) || niter >= 150
+                if (abs(err(1)) <= this.tol && abs(err(2)) <= this.tol && abs(err(3)) <= this.tol) || niter >= 150
                     break;
                 end
 
                 disp(err)
 
-                action = k_error*err;
-
                 for i = 1:3
-                    if action(i) > 0 
-                        action(i) = min(action(i), accion_max);
+                    if err(i) > 0 
+                        action(i) = min(k_error*err(i), accion_max);
                     else
-                        action(i) = max(action(i), -accion_max);
-                    end
-
-                    if abs(action(i)) < 50
-                        action(i) = 0;
+                        action(i) = max(k_error*err(i), -accion_max);
                     end
                 end
-
-                
                 
                 disp(action)
-                this.WriteSegmentMillis(action');
+                this.WriteSegmentMillis(action);
 
-                pause(0.5)
+                pause(2)
             end
 
         end
