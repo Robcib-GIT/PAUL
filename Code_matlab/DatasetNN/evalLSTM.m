@@ -6,7 +6,7 @@
 % Setup
 close all
 secondTestPrev = true;
-max_error = 1;
+max_error = 0.7;
 R = [1 0 0; 0 0 1; 0 -1 0];
 
 % Preparing the data (if second_test has not been executed before)
