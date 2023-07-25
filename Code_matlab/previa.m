@@ -1,4 +1,10 @@
-
+R.Measure();
+pause(0.1)
+% disp(R.voltages)
+% R.Measure();
+% for i = 1:100000000
+% end
+caca = R.getVoltages()
 
 % for j = 1:1027
 %     while 1

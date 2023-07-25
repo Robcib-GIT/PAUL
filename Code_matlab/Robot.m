@@ -25,8 +25,9 @@ classdef Robot < handle
         matrix_tV;
         max_min;
         volts;
-        tol = 1e-2;
-        net;
+        tol = 20;
+        net_pt;
+        net_vt;
         K_p = [5000 5000 5000];
         K_i = 0;
         K_d = 0;
@@ -622,50 +623,53 @@ classdef Robot < handle
             perform = perf(this.net,volt(n+1:end,:)',out);
         end
 
-        function NN_creation(this, network)
-            this.net = network;
+        function NN_creation(this, network_pt, network_vt)
+            this.net_pt = network_pt;
+            this.net_vt = network_vt;
         end
 
 
         %% Control of a single segment
-        function Move(this, x)
+        function [pos_final, error_pos] = Move(this, x)
             
             niter = 0;
             action = zeros(1,3);
+            err = [900 900 900];
+            max_accion = 200;
+            toler = 30;
 
             if length(x) ~= 3
                 errordlg("Introduce un punto en el espacio (vector fila de 3 componentes)","Execution Error");
                 return
             end
 
-            this.Measure();
-            for i = 1:100000000
-            end
-            vol_current = this.getVoltages();
+            t_obj = this.net_pt(x');
 
-            v_obj = this.net(x);
-
-            err = vol_current - v_obj;
-            
-            while abs(err) > this.tol && niter < 150
+            while (abs(err(1)) > toler || abs(err(2)) > toler || abs(err(3)) > toler) && niter < 30
                 niter = niter + 1;
+                this.Measure();
+                pause(0.1)
+                vol_current = this.getVoltages();
+
+                t_current = this.net_vt(vol_current);
+                err = t_obj - t_current
+                pause(0.1)
 
                 for i = 1:3
                     if err(i) > 0 
-                        action(i) = min(err(i), this.maxAction);
+                        action(i) = min(err(i), max_accion);
                     else
-                        action(i) = max(err(i), -this.maxAction);
+                        action(i) = max(err(i), -max_accion);
                     end
                 end
             
                 this.WriteSegmentMillis(action);
-
-                this.Measure();
-                for i = 1:100000000 
-                end
-                vol_current = this.getVoltages();
-                err = vol_current - v_obj;
+                pause(0.5)
             end
+
+            pos_final_raw = this.CapturePosition;
+            pos_final = pos_final_raw(2,:);
+            error_pos = norm(pos_final - x);
 
         end
 
