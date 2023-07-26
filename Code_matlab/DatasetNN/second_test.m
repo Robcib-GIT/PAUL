@@ -8,7 +8,7 @@ clear;
 
 % Setup
 dataset = 3;
-netType = 2;
+netType = 1;
 
 % Loading and extracting the real data
 switch dataset
@@ -66,7 +66,7 @@ end
 % Training the net
 switch netType
     case 1
-        net = feedforwardnet(125);
+        net = feedforwardnet(40);
         net.name = 'PAUL';
         [net, tr] = train(net, pos2(1:end-10,:)', vol2(1:end-10,:)');
     case 2
