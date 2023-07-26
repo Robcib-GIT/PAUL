@@ -7,10 +7,10 @@ close all;
 clear;
 
 % Loading and extracting the real data
-load('prueba6_3.mat')
-vol2 = vol(1:300,:);
-pos2 = pos(1:300,:);
-t2 = prueba(1:300,:);
+load('prueba_DEF_def.mat')
+vol2 = vol(1:end,:);
+pos2 = pos(1:end,:);
+t2 = t(1:end,:);
 
 % Normalising
 muV = mean(vol2);
@@ -24,12 +24,11 @@ vol2 = (vol2 - muV) ./ sigmaV;
 pos2 = (pos2 - muP) ./ sigmaP;
 t2 = (t2 - muT) ./ sigmaT;
 
+t3 = {};
+t3{1} = [0 0 0; t2(1,:)]';
 
-vol3 = {};
-vol3{1} = [0 -77 0; vol2(1,:)]';
-
-for i = 2:size(vol2)
-    vol3{i} = [vol2(i-1,:); vol2(i,:)]';
+for i = 2:size(t2)
+    t3{i} = [t2(i-1,:); t2(i,:)]';
 end
 
 % Training the net
@@ -45,21 +44,21 @@ layers = [ ...
 
 options = trainingOptions('adam', ...
     'ExecutionEnvironment','cpu', ...
-    'MaxEpochs',4000, ...
+    'MaxEpochs',3000, ...
     'MiniBatchSize',50, ...
     'GradientThreshold',1, ...
     'Verbose',false, ...
     'Plots','training-progress');
 
-net = trainNetwork(vol3(1:end-10)', t2(1:end-10,:), layers, options);
+net = trainNetwork(t3(1:end-10)', vol2(1:end-10,:), layers, options);
 
 % Results
 error = zeros(10,1);
 res =zeros(10,1);
 for i = 1:10
-    [~, res] = predictAndUpdateState(net,vol3(end - i)); 
-    error(i) = norm(res - t2(end - i,:));
+    [~, res] = predictAndUpdateState(net,t3(end - i)); 
+    error(i) = norm(res - vol2(end - i,:));
 end          
 
 disp(mean(error))
-disp(mean(error)*mean(prueba))
+disp(mean(error)*mean(vol2))
