@@ -672,7 +672,7 @@ classdef Robot < handle
                 end
             
                 this.WriteSegmentMillis(action);
-                pause(2.5)
+                pause(0.5)
             end
 
             pos_final_raw = this.CapturePosition;
@@ -681,57 +681,50 @@ classdef Robot < handle
 
         end
 
-        function Move_vol(this, v)
+        function [pos_final, error_pos, pos_inter] = Move_debug(this, x)
             
             niter = 0;
-            k_error = [400 -30 -60; -80 450 -60; -70 -30 400];
-            accion_max = 300;
-            toler = 3e-1;
+            action = zeros(1,3);
+            pos_inter = zeros(20,3);
+            err = [900 900 900];
+            max_accion = 300;
+            toler = 20;
 
-            if length(v) ~= 3
-                errordlg("Introduce un vector de voltages objetivo (vector fila de 3 componentes)","Execution Error");
+            if length(x) ~= 3
+                errordlg("Introduce un punto en el espacio (vector fila de 3 componentes)","Execution Error");
                 return
             end
 
-            v_obj = v';
-            
-            while 1
-                
+            t_obj = this.net_pt(x');
+
+            while (abs(err(1)) > toler || abs(err(2)) > toler || abs(err(3)) > toler) && niter < 20
                 niter = niter + 1;
+                pos_raw = this.CapturePosition;
+                pos_inter(niter,:) = pos_raw(2,:);
 
                 this.Measure();
-                for i = 1:100000000
-                end
+                pause(0.1)
                 vol_current = this.getVoltages();
-                err = vol_current - v_obj;
 
-                if (abs(err(1)) <= toler && abs(err(2)) <= toler && abs(err(3)) <= toler) || niter >= 150
-                    break;
-                end
-
-                disp(err)
-
-                action = k_error*err;
+                t_current = this.net_vt(vol_current);
+                err = t_obj - t_current;
+                pause(0.1)
 
                 for i = 1:3
-                    if action(i) > 0 
-                        action(i) = min(action(i), accion_max);
+                    if err(i) > 0 
+                        action(i) = min(err(i), max_accion);
                     else
-                        action(i) = max(action(i), -accion_max);
-                    end
-
-                    if abs(action(i)) < 50
-                        action(i) = 0;
+                        action(i) = max(err(i), -max_accion);
                     end
                 end
-
-                
-                
-                disp(action)
-                this.WriteSegmentMillis(action');
-
+            
+                this.WriteSegmentMillis(action);
                 pause(0.5)
             end
+
+            pos_final_raw = this.CapturePosition;
+            pos_final = pos_final_raw(2,:);
+            error_pos = norm(pos_final - x);
 
         end
 
