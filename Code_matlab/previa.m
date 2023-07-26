@@ -1,26 +1,6 @@
-R.Measure();
-pause(0.1)
-% disp(R.voltages)
-% R.Measure();
-% for i = 1:100000000
-% end
-caca = R.getVoltages()
+for i = 1:20
+    errores(i) = norm(error_pos(i)-error_peso(i));
+end
 
-% for j = 1:1027
-%     while 1
-% 
-%         prueba(j,:) = -50 + 50*randi(fix(((900)/50 + 1)), [1 3]);
-%     
-%         indice = find(prueba(j,:) == min(prueba(j,:)));
-%     
-%         if (prueba(j,indice(1)) ~= 0) && (isempty(find(prueba(j,:) == 0, 1)))
-%             prueba(j,indice(1)) = 0;
-%         end
-% 
-%         if isempty(find(ismember(prueba(j,:),prueba(1:j-1,:),'rows') == 1,1))
-%             break;
-%         end
-%     end
-% end
-
+mean(errores)
 
