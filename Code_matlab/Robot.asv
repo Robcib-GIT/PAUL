@@ -80,7 +80,7 @@ classdef Robot < handle
             this.geom.segmLength = 90;                      % Length of a segment
             this.geom.radius = 40;                          % Radius of the sensors' circle
             this.geom.phi0 = pi/2;
-            this.geom.zoff_modo2 = 7;
+            this.geom.zoff_modo1 = 7;
             this.geom.xoff_modo2 = 69;
 
             % Camera representation
@@ -192,7 +192,7 @@ classdef Robot < handle
             end
 
             % New reference frame
-            this.OP_mode = 0;
+            this.zeroSet = false;
            
             % Extrinsic parameters
             tempX = load('par.mat','cameraParams_yz');
@@ -322,7 +322,7 @@ classdef Robot < handle
                 this.origin = [pos; this.bottom; euler];
                 this.OP_mode = 2;
             elseif (this.OP_mode == 1)
-                this.bottom = pos(1,:) + [0 -this.geom.zoff_modo2 -this.geom.xoff_modo2];
+                this.bottom = pos(1,:) + [0 -this.geom.trihDistance 0];
                 this.base = this.bottom + [0 -this.geom.segmLength 0];
                 this.origin = [pos; this.bottom; euler];
                 this.OP_mode = 2;
@@ -644,7 +644,7 @@ classdef Robot < handle
             action = zeros(1,3);
             err = [900 900 900];
             max_accion = 300;
-            toler = 40;
+            toler = 25;
 
             if length(x) ~= 3
                 errordlg("Introduce un punto en el espacio (vector fila de 3 componentes)","Execution Error");
@@ -653,7 +653,7 @@ classdef Robot < handle
 
             t_obj = this.net_pt(x');
 
-            while (abs(err(1)) > toler || abs(err(2)) > toler || abs(err(3)) > toler) && niter < 10
+            while (abs(err(1)) > toler || abs(err(2)) > toler || abs(err(3)) > toler) && niter < 20
                 niter = niter + 1;
                 this.Measure();
                 pause(0.1)
@@ -672,7 +672,7 @@ classdef Robot < handle
                 end
             
                 this.WriteSegmentMillis(action);
-                pause(2.5)
+                pause(0.5)
             end
 
             pos_final_raw = this.CapturePosition;
