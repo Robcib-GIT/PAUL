@@ -554,7 +554,7 @@ classdef Robot < handle
 
             % Singular configuration
             else
-                phi = 0;    % Cualquier valor es posible
+                phi = 0;    % Every value is possible
                 kappa = 0;
                 lr = xP(3);            
             end
@@ -621,17 +621,31 @@ classdef Robot < handle
         end
 
         %% Neural Network
-        function perform = NN_trainning(this, pos, volt, capas)
+        function [perform_pt, perform_vt] = NN_training(this, pos, volt, tiempo, capas_pt, capas_vt)
+            % [perform_pt, perform_vt] = Robot.NN_training(pos, volt,
+            % tiempo, capas_pt, capas_vt) trains and creates the two
+            % required neural networks for the control system of the
+            % robot
+        
             n = fix(0.95*length(pos));
-
-            this.net = feedforwardnet(capas);
-            this.net = train(this.net,pos(1:n,:)',volt(1:n,:)');
-
-            out = this.net(pos(n+1:end,:)');
-            perform = perf(this.net,volt(n+1:end,:)',out);
+        
+            this.net_pt = feedforwardnet(capas_pt);
+            this.net_pt = train(this.net_pt,pos(1:n,:)',tiempo(1:n,:)');
+        
+            out_pt = this.net_pt(pos(n+1:end,:)');
+            perform_pt = perform(this.net_pt,tiempo(n+1:end,:)',out_pt);
+        
+            this.net_vt = feedforwardnet(capas_vt);
+            this.net_vt = train(this.net_vt,volt(1:n,:)',tiempo(1:n,:)');
+        
+            out_vt = this.net_vt(volt(n+1:end,:)');
+            perform_vt = perform(this.net_vt,tiempo(n+1:end,:)',out_vt);
         end
-
+        
         function NN_creation(this, network_pt, network_vt)
+            % Robot.NN_creation(network_pt, network_vt) creates and
+            % storages the already created neural networks
+        
             this.net_pt = network_pt;
             this.net_vt = network_vt;
         end
@@ -639,6 +653,8 @@ classdef Robot < handle
 
         %% Control of a single segment
         function [pos_final, error_pos] = Move(this, x)
+            % [pos_final, error_pos] = Robot.Move(x) moves the robot to an
+            % specified point (x) in the workspace of the robot
             
             niter = 0;
             action = zeros(1,3);
