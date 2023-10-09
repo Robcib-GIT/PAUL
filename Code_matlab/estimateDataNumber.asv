@@ -1,0 +1,20 @@
+%% Estimate number of data for training NN
+
+% alphaRange = 0:100:700;
+% T = zeros(length(alphaRange),3);
+% for alpha = alphaRange
+%     [p1, p2] = r.NN_training(pos(1:end-alpha,:), vol(1:end-alpha,:), t(1:end-alpha,:), 275, 250);
+%     T(alpha+1,:) = [alpha, p1, p2];
+% end
+
+NData = 300:100:700;
+NeurPT = [10 25 50 75];
+NeurVT = [10 25 50 75];
+
+for n = NData
+    for p = NeurPT
+        for v = NeurVT
+            r.NN_training(pos(1:n,:), vol(1:n,:), t(1:n,:), p, v);
+            p1 = perform(r.net_pt, t(n+1:end,:)', r.net_pt(pos(n+1:end,:)'));
+            p2 = perform(r.net_vt, t(n+1:end,:)', r.net_vt(pos(n+1:end,:)'));
+            
