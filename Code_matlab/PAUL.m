@@ -1,14 +1,14 @@
-%% Class for robot control
+%% Class for PAUL control
 %
 % Jorge F. García-Samartín
 % www.gsamartin.es
 % 2023-05-16
 
-classdef Robot < handle
+classdef PAUL < handle
 
     properties (Access = public)
         serialDevice;                       % Serial port to which Arduino is connected
-        realMode = 1;                       % 1 if working with the real robot
+        realMode = 1;                       % 1 if working with the real PAUL
         deflatingTime = 1500;               % Default deflating time
         deflatingRatio = 2;                 % Relation between deflation and inflation time
         maxAction = 200;
@@ -57,10 +57,10 @@ classdef Robot < handle
 
     methods
         %% Constructor and destructor
-        function this = Robot(nValves)
+        function this = PAUL(nValves)
             % Class constructor
             %
-            % Robot(nValves) creates the object to handle a robot with
+            % PAUL(nValves) creates the object to handle a PAUL with
             % nValves valves.
             %
             % Default values:
@@ -76,7 +76,7 @@ classdef Robot < handle
             this.positions = zeros(6, 1);
 
             % Geometric parameters
-            this.geom.trihDistance = 77;                    % Distance (mm) from the centre of the green ball to the centre of the bottom of the robot
+            this.geom.trihDistance = 77;                    % Distance (mm) from the centre of the green ball to the centre of the bottom of the PAUL
             this.geom.segmLength = 90;                      % Length of a segment
             this.geom.radius = 40;                          % Radius of the sensors' circle
             this.geom.phi0 = pi/2;
@@ -94,7 +94,7 @@ classdef Robot < handle
         function this = delete(this)
             % Class destructor
             %
-            % Robot.delete() destroys the object and deletes all its
+            % PAUL.delete() destroys the object and deletes all its
             % properties.
 
             p = properties(this);
@@ -112,7 +112,7 @@ classdef Robot < handle
         function this = Connect(this, serial, freq)
             % Stablish connexion with the Arduino using the serial port
             % 
-            % Robot.Connect(serial, freq) connects to the serial port specified
+            % PAUL.Connect(serial, freq) connects to the serial port specified
             % in serial at frequency freq.
             %
             % Default values:
@@ -132,7 +132,7 @@ classdef Robot < handle
             configureTerminator(this.serialDevice,"CR/LF")
             configureCallback(this.serialDevice, "terminator", @(varargin)this.ReadSerialData)
 
-            % Sending info of the robot
+            % Sending info of the PAUL
             writeline(this.serialDevice, "i" + this.realMode);
 
         end
@@ -140,8 +140,8 @@ classdef Robot < handle
         function this = Disconnect(this)
             % Erase connexion with the Arduino
             %
-            % Robot.Disconnect() clears the existent connection with the
-            % Arduino and returns Robot.serialDevice value to 0
+            % PAUL.Disconnect() clears the existent connection with the
+            % Arduino and returns PAUL.serialDevice value to 0
 
             delete(this.serialDevice)
             disp("Connection has been removed")
@@ -158,7 +158,7 @@ classdef Robot < handle
             % captured by the camera, in case of the default ones have been
             % closed.
             %
-            % Robot.MakeAxis() creates the suplot in where the images of
+            % PAUL.MakeAxis() creates the suplot in where the images of
             % the camera and the captured positions will be shown.
             
             figure;
@@ -173,7 +173,7 @@ classdef Robot < handle
             % Calculates the extrinsic parameters of the cameras and loads
             % the intrinsic ones.
             %
-            % Robot.CallibrateCameras() returns in variable this.cam all
+            % PAUL.CallibrateCameras() returns in variable this.cam all
             % the necessary parameters to work with the cameras and two
             % figures displaying its possition relative to the chessboard
 
@@ -218,13 +218,13 @@ classdef Robot < handle
             % The posiition of the centre of the bottom and the Euler
             % angles are also stored in the last column of this.positions array
             %
-            % pos = Robot.CapturePosition() Capture pictures with the
+            % pos = PAUL.CapturePosition() Capture pictures with the
             % cameras and returns matrix pos, which contains, by rows
             % the position of the green, red and blue dots, the estimated
             % position of the centre of the bottom and the Euler angles,
-            % expressed with respect to the centre of the robot base.
+            % expressed with respect to the centre of the PAUL base.
             % 
-            % [pos2, pos] = Robot.CapturePosition() also returns the
+            % [pos2, pos] = PAUL.CapturePosition() also returns the
             % position expressed with respect to the cameras' reference
             % frame.
             
@@ -344,7 +344,7 @@ classdef Robot < handle
         
         %% Sending pressure to valves
         function Deflate(this)
-            % Robot.Deflate() deflates all the valves, sending negative
+            % PAUL.Deflate() deflates all the valves, sending negative
             % pressure during the time specified in this.deflatingTime,
             % which default value is 1000
 
@@ -358,12 +358,12 @@ classdef Robot < handle
         end
 
         function WriteOneValveMillis(this, valv, millis)
-            % Robot.WriteOneValveMillis(valv, millis) sends to valve valv
+            % PAUL.WriteOneValveMillis(valv, millis) sends to valve valv
             % air during the time specified in millis.
             %
             % The value of millis can  be possitive (inflating the valve)
             % or negative (deflating the valve). Negativa values are
-            % multiplied by Robot.deflatingRatio
+            % multiplied by PAUL.deflatingRatio
 
             if millis > 0
                 writeline(this.serialDevice, "f," + int2str(valv) + "," + int2str(millis));
@@ -382,24 +382,24 @@ classdef Robot < handle
         
         %% Reading valve state and sensors
         function millis = GetMillisSent(this)
-            % millis = GetMillisSent() returns a 1 x Robot.nValves array 
+            % millis = GetMillisSent() returns a 1 x PAUL.nValves array 
             % containing the volume of air sent to each valve.
             % 
             % The values stored in millis are the values sent by the user,
             % not the ones which have been really sent (they ARE NOT
-            % multplied by Robot.deflatingRatio).
+            % multplied by PAUL.deflatingRatio).
 
             millis = this.millisSentToValves;
 
         end
 
         function millis = GetMillis(this)
-            % millis = GetMillis() returns a 1 x Robot.nValves array 
+            % millis = GetMillis() returns a 1 x PAUL.nValves array 
             % containing the volume of air sent to each valve.
             % 
             % The values stored in millis are the values read after
             % communicating with the Arduino (they ARE multplied by
-            % Robot.deflatingRatio).
+            % PAUL.deflatingRatio).
 
             write(this.serialDevice, 'r', "char");
             millis = str2double(readline(this.serialDevice));
@@ -407,7 +407,7 @@ classdef Robot < handle
         end
 
         function Measure(this)
-            % measurement = Robot.Measure() returns a Robot.nSensors x 1 array
+            % measurement = PAUL.Measure() returns a PAUL.nSensors x 1 array
             % containing the voltages read by Arduino.
             %
             % The values of data are also stored in the last column of
@@ -444,7 +444,7 @@ classdef Robot < handle
         function CallbackMeasurement(this)
             % Callback associated to the mesure
             %
-            % Robot.CallbackMeasurement split the measures received 
+            % PAUL.CallbackMeasurement split the measures received 
             measurement = this.serialData;
             disp(measurement);
             measurement = split(measurement);
@@ -454,9 +454,9 @@ classdef Robot < handle
         end
 
         function ResetVoltagesPositions(this)
-            % Reset the values of Robot.voltages and Robot.positions to
-            % default (Robot.voltages will be a nSensors x 1 array and
-            % Robot.positions, a 6 x 1 array)
+            % Reset the values of PAUL.voltages and PAUL.positions to
+            % default (PAUL.voltages will be a nSensors x 1 array and
+            % PAUL.positions, a 6 x 1 array)
           
             this.voltages = zeros(this.nSensors, 1);
             this.positions = zeros(6, 1);
@@ -464,9 +464,9 @@ classdef Robot < handle
 
         function data = ReadSerialData(this)
             % Callback associated to the serial port specified in
-            % Robot.serialDevice
+            % PAUL.serialDevice
             % 
-            % data = Robot.ReadSerialData() returns a string containing the data
+            % data = PAUL.ReadSerialData() returns a string containing the data
             % read by the serial port.
 
             data = readline(this.serialDevice);
@@ -507,20 +507,20 @@ classdef Robot < handle
 
         %% Kinematic modelling
         function [l, params] = MCI(this, xP, phi0, a)
-            % Calculate the inverse kinematic model of a three-wire robot 
+            % Calculate the inverse kinematic model of a three-wire PAUL 
             % using the PCC method.
             % 
-            % l = Robot.MCI() returns the lengths of the three wires of a
-            % robot, knowing the position of its end (x) and the diameter
+            % l = PAUL.MCI() returns the lengths of the three wires of a
+            % PAUL, knowing the position of its end (x) and the diameter
             % of the circumference they form (a). Orientation may or may
             % not be included in x.
             % 
-            % [l, params] = Robot.MCI() returns, in addition to the lengths
+            % [l, params] = PAUL.MCI() returns, in addition to the lengths
             % of the wires, a structure with the values of lr (average
             % length), phi (orientation) and kappa (curvature)
             % 
-            % l = Robot.MCI(phi0) allows to rotate, counter-clockwise, an
-            % angle phi0 the robot reference system.
+            % l = PAUL.MCI(phi0) allows to rotate, counter-clockwise, an
+            % angle phi0 the PAUL reference system.
             
             % Initial setup
             switch nargin
@@ -572,11 +572,11 @@ classdef Robot < handle
         
         function [T, params] = MCD(this, l, a)  
             
-            % Calcula el modelo cinemático directo de un robot de tres cables
+            % Calcula el modelo cinemático directo de un PAUL de tres cables
             % utilizando el método PCC.
             %
             % T = MCD(l, a) devuelve la matriz de transformación homogénea que permite
-            % pasar de la base al extremo del robot, conocidas las longtiudes de sus
+            % pasar de la base al extremo del PAUL, conocidas las longtiudes de sus
             % cables (l) y el diámetro de la circunferencia que forman (a).
             % 
             % [T, params] = MCD(l, a) devuelve, además de la matriz de transformación
@@ -622,10 +622,9 @@ classdef Robot < handle
 
         %% Neural Network
         function [perform_pt, perform_vt] = NN_training(this, pos, volt, tiempo, capas_pt, capas_vt)
-            % [perform_pt, perform_vt] = Robot.NN_training(pos, volt,
+            % [perform_pt, perform_vt] = PAUL.NN_training(pos, volt,
             % tiempo, capas_pt, capas_vt) trains and creates the two
-            % required neural networks for the control system of the
-            % robot
+            % required neural networks for the control system of PAUL
         
             n = fix(0.95*length(pos));
         
@@ -643,7 +642,7 @@ classdef Robot < handle
         end
         
         function NN_creation(this, network_pt, network_vt)
-            % Robot.NN_creation(network_pt, network_vt) creates and
+            % PAUL.NN_creation(network_pt, network_vt) creates and
             % storages the already created neural networks
         
             this.net_pt = network_pt;
@@ -653,8 +652,8 @@ classdef Robot < handle
 
         %% Control of a single segment
         function [pos_final, error_pos] = Move(this, x)
-            % [pos_final, error_pos] = Robot.Move(x) moves the robot to an
-            % specified point (x) in the workspace of the robot
+            % [pos_final, error_pos] = PAUL.Move(x) moves the PAUL to an
+            % specified point (x) in the workspace of PAUL
             
             niter = 0;
             action = zeros(1,3);
