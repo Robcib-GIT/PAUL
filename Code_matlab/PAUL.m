@@ -692,11 +692,18 @@ classdef PAUL < handle
             % keeping a register of all the intermediate positions.
             
             niter = 0;
+            t1 = datetime('now');
             action = zeros(1,3);
             pos_inter = zeros(20,3);
             err = [900 900 900];
+            err_prev = err;
             max_accion = 300;
             toler = 40;
+
+            % PID Parameteres
+            Kp = 1;
+            Kd = 0.01;
+            Ki = 0;
 
             if length(x) ~= 3
                 errordlg("Introduce un punto en el espacio (vector fila de 3 componentes)","Execution Error");
@@ -704,11 +711,12 @@ classdef PAUL < handle
             end
 
             t_obj = this.net_pt(x');
-            t1 = datetime('now');
-            
+
             while (abs(err(1)) > toler || abs(err(2)) > toler || abs(err(3)) > toler) && niter < 10
                 
                 t2 = datetime('now');
+                dt = seconds(t2 - t1);
+                t1 = t2;
                 niter = niter + 1;
 
                 if DEBUG
@@ -727,13 +735,18 @@ classdef PAUL < handle
 
                 t_current = this.net_vt(vol_current);
                 err = t_obj - t_current;
+                act_p = err;
+                act_d = (err - err_prev) / dt;
+                act_i = (err + err_prev) * dt / 2;
+                act = Kp * act_p + Kd * act_d + Ki * act_i;
+                err_prev = err;
                 pause(0.1)
 
                 for i = 1:3
                     if err(i) > 0 
-                        action(i) = min(err(i), max_accion);
+                        action(i) = min(act(i), max_accion);
                     else
-                        action(i) = max(err(i), -max_accion);
+                        action(i) = max(act(i), -max_accion);
                     end
                 end
             

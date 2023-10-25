@@ -6,7 +6,7 @@
 close all
 
 % Target
-point = pos(8,:);
+point = pos(7,:);
 
 % Movement
 [pos_final, erro_pos, pos_inter] = r.Move(point, true)

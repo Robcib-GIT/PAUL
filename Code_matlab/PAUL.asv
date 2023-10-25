@@ -692,9 +692,11 @@ classdef PAUL < handle
             % keeping a register of all the intermediate positions.
             
             niter = 0;
+            t1 = datetime('now');
             action = zeros(1,3);
             pos_inter = zeros(20,3);
             err = [900 900 900];
+            err_prev = err;
             max_accion = 300;
             toler = 40;
 
@@ -706,7 +708,10 @@ classdef PAUL < handle
             t_obj = this.net_pt(x');
 
             while (abs(err(1)) > toler || abs(err(2)) > toler || abs(err(3)) > toler) && niter < 10
-                time = datetime()
+                
+                t2 = datetime('now');
+                dt = t2 - t1;
+                t1 = t2;
                 niter = niter + 1;
 
                 if DEBUG
@@ -725,6 +730,10 @@ classdef PAUL < handle
 
                 t_current = this.net_vt(vol_current);
                 err = t_obj - t_current;
+                prop = err;
+                dr = (err - err_prev) / dt;
+                In
+                err_prev = err;
                 pause(0.1)
 
                 for i = 1:3
