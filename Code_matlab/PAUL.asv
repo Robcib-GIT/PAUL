@@ -704,11 +704,9 @@ classdef PAUL < handle
             end
 
             t_obj = this.net_pt(x');
-            t1 = datetime('now');
-            
+
             while (abs(err(1)) > toler || abs(err(2)) > toler || abs(err(3)) > toler) && niter < 10
-                
-                t2 = datetime('now');
+                time = datetime()
                 niter = niter + 1;
 
                 if DEBUG
