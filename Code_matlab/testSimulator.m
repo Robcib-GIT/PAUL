@@ -6,10 +6,10 @@
 close all
 
 % Target
-point = pos(8,:);
+point = pos(12,:);
 
 % Movement
-[pos_final, erro_pos, pos_inter] = r.Move(point, true)
+[pos_final, error_pos, pos_inter] = r.Move(point, true)
 disp(point)
 
 % Plotting

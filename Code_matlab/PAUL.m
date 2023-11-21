@@ -8,7 +8,7 @@ classdef PAUL < handle
 
     properties (Access = public)
         serialDevice;                       % Serial port to which Arduino is connected
-        realMode = 0;                       % 1 if working with the real PAUL
+        realMode = 1;                       % 1 if working with the real PAUL
         deflatingTime = 1500;               % Default deflating time
         deflatingRatio = 2;                 % Relation between deflation and inflation time
         maxAction = 200;
@@ -428,27 +428,6 @@ classdef PAUL < handle
                 measurement = this.net_tpv(this.millisSentToValves(1:this.nSensors)' * error);
                 this.voltages(:,end+1) = measurement(4:6)';
             end
-
-            % Reading
-%             t1 = datetime("now");
-%             t2 = t1;
-%             while this.serialType ~= 'M' && seconds(t2 - t1) < 5
-%             end
-%             while seconds(t2 - t1) < 0.5
-%                 a = this.serialType;
-%                 if this.serialType == 'M'
-%                     measurement = this.serialData;
-%                     break
-%                 end
-%                 t2 = datetime("now");
-%             end
-%             if seconds(t2 - t1) >= 0.5
-%                 disp("After 500ms, no measurement is available");
-%             end
-%             measurement = this.serialData;
-%             measurement = split(measurement);
-%             measurement = str2double(measurement);
-%             this.voltages(:,end+1) = measurement(2:1+this.nSensors);
         end
 
         function CallbackMeasurement(this)
@@ -675,11 +654,11 @@ classdef PAUL < handle
             
             if nargin == 3
                 this.net_tpv = [];
+            else
+                this.net_tpv = network_tpv;
             end
-
             this.net_pt = network_pt;
             this.net_vt = network_vt;
-            this.net_tpv = network_tpv;
         end
 
 
@@ -690,6 +669,10 @@ classdef PAUL < handle
             %
             % [pos_final, error_pos, pos_inter] = PAUL.Move(x, true) allows
             % keeping a register of all the intermediate positions.
+
+            if nargin == 2
+                DEBUG = false;
+            end
             
             niter = 0;
             t1 = datetime('now');
@@ -730,7 +713,9 @@ classdef PAUL < handle
                 end
 
                 this.Measure();
-                pause(0.1)
+                if this.realMode
+                    pause(0.1)
+                end
                 vol_current = this.getVoltages();
 
                 t_current = this.net_vt(vol_current);
@@ -740,7 +725,9 @@ classdef PAUL < handle
                 act_i = (err + err_prev) * dt / 2;
                 act = Kp * act_p + Kd * act_d + Ki * act_i;
                 err_prev = err;
-                pause(0.1)
+                if this.realMode
+                    pause(0.1)
+                end
 
                 for i = 1:3
                     if err(i) > 0 
@@ -751,7 +738,9 @@ classdef PAUL < handle
                 end
             
                 this.WriteSegmentMillis(action);
-                pause(0.5)
+                if this.realMode
+                    pause(0.5)
+                end
             end
 
             if this.realMode
