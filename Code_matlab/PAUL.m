@@ -71,6 +71,9 @@ classdef PAUL < handle
                 case 1
                     this.nValves = nValves;
             end
+            
+            % Adding aux functions to path
+            addpath('./Src')
 
             this.millisSentToValves = zeros(1, this.nValves);
             this.voltages = zeros(this.nSensors, 1);
