@@ -73,6 +73,7 @@ classdef PAUL < handle
             end
             
             % Adding aux functions to path
+            addpath('./')
             addpath('./Src')
 
             this.millisSentToValves = zeros(1, this.nValves);
@@ -82,7 +83,8 @@ classdef PAUL < handle
             % Geometric parameters
             this.geom.trihDistance = 77;                    % Distance (mm) from the centre of the green ball to the centre of the bottom of the PAUL
             this.geom.segmLength = 90;                      % Length of a segment
-            this.geom.radius = 40;                          % Radius of the sensors' circle
+            this.geom.radius = 45;                          % Radius of the sensors' circle
+            this.geom.height = 20;                          % Height of the connectors
             this.geom.phi0 = pi/2;
             this.geom.zoff_modo2 = 7;
             this.geom.xoff_modo2 = 69;
@@ -529,8 +531,7 @@ classdef PAUL < handle
                     a = this.geom.radius;
                     
             end
-            
-        
+               
             % Dependent modelling
             % General case
             if (sum(xP(1:2) - [0 0]))
@@ -555,15 +556,13 @@ classdef PAUL < handle
             params.phi = phi;
             params.kappa = kappa;
         
-            %% Independent modelling
+            % Independent modelling
             phi_i = phi0 + [pi pi/3 -pi/3];
             l = lr * (1 + kappa*a*sin(phi + phi_i));
             this.l = l;
         end
-
         
-        function [T, params] = MCD(this, l, a)  
-            
+        function [T, params] = MCD(this, l, a)              
             % Calcula el modelo cinemático directo de un PAUL de tres cables
             % utilizando el método PCC.
             %
@@ -609,6 +608,114 @@ classdef PAUL < handle
             else
                 T = [1 0 0 0; 0 1 0 0; 0 0 1 lr; 0 0 0 1];
             end
+        
+        end
+
+        function [c1, c2, o2] = PlotSegment(this, times_obj, pos, or)
+            % Plot one segment of PAUL and its bases, assuming the PCC model hypothesis
+            % with base at pos and orientation or
+            %
+            % [c1, c2, o2] = PAUL.PlotSegment(a, times) plots a segment for robot r (PAUL type) and
+            % bladders infated during times (in milliseconds). It returns the centres
+            % of the circles of the base and the bottom and the orientation of the
+            % bottom, in Euler angles
+            % 
+            % [c1, c2, o2] = PAUL.PlotSegment(a, times, pos, or) locates the base at position pos and
+            % rotates it an orientation or
+
+            switch nargin
+                case 4
+                    if ~iscolumn(pos)
+                        pos = pos';
+                    end
+                case 3
+                    or = [0 0 0];
+                    if ~iscolumn(pos)
+                        pos = pos';
+                    end
+                case 2
+                    or = [0 0 0];
+                    pos = [0 0 0]';
+            end
+        
+            % Kinematics
+            a = this.geom.radius;
+            RotM = eul2rotm(or);
+        
+            pos_obj = this.net_tpv(times_obj');
+            [length, ~] = this.MCI(this.R * pos_obj(1:3));
+            [T, params] = this.MCD(length, a);
+        
+            rho = 1 / params.kappa;
+            theta = params.kappa * params.lr;
+                
+            % Drawing
+            axis equal
+            hold on
+            grid on
+        
+            centre = [rho*cos(params.phi), rho*sin(params.phi), 0]';
+            [~,c] = circle(centre, rho, theta, params.phi);
+            c = RotM*c + pos;
+            plot3(c(1,:), c(2,:), c(3,:));
+            
+            % Base and final
+            s = 0:pi/50:2*pi;
+            circ = a * [cos(s);sin(s);zeros(size(s))];
+            circ = RotM*circ + pos;
+            plot3(circ(1,:),circ(2,:),circ(3,:),'k')
+        
+            circ = c(:,end) - a * RotM * T(1:3,1:3) * [cos(s);sin(s);zeros(size(s))];
+            plot3(circ(1,:),circ(2,:),circ(3,:),'k')
+        
+            hold off
+        
+            % Centres of the bases
+            c1 = c(:,1)';
+            c2 = c(:,end)';
+            o2 = rotm2eul(RotM*T(1:3,1:3));
+        
+        end
+
+        function [p, c1, c2, o2] = Plot(this, times_obj)
+            % p = PAUL.Plot(times_obj) plots PAUL orientation and position
+            % for each segment when inflating the bladders the milliseconds
+            % specified in times_obj and returns the position of the final
+            % tip (the centre of the bottom base)
+            % Variable times_objs must contain a row per segment and in
+            % each column of the row, the inflation team of the
+            % corresponding bladder.
+            %
+            % [p, c1, c2] = PAUL.Plot(times_obj) also returns the position
+            % of each intermediate base (c1 for the bottom of the
+            % connectors and c2 for the top)
+            %
+            % [p, c1, c2] = PAUL.Plot(times_obj) also returns the
+            % orientation of each intermediate base, in Euler angles.
+
+            % Setup
+            height = this.geom.height;
+            pos = [0 0 0];
+            o2 = zeros(size(times_obj, 1) + 1, 3);
+            c1 = zeros(size(times_obj, 1), 3);
+            c2 = zeros(size(c1));
+            
+            % Drawing each segment
+            figure
+            for seg = 1:size(times_obj, 1)
+                [c1(seg,:), c2(seg,:), o2(seg+1,:)] =  this.PlotSegment(times_obj(seg,:), pos, o2(seg,:));
+                pos = c2(seg,:) + height * (c2(seg,:) - c1(seg,:))/ norm(c2(seg,:) - c1(seg,:));
+            end
+
+            % Returning values
+            p = c2(end,:);
+        
+            % Plot settings
+            xlabel('x')
+            ylabel('y')
+            zlabel('z')
+            grid on
+            view(145, 9);
         
         end
 
@@ -761,54 +868,8 @@ classdef PAUL < handle
 
         end
 
-        function [pos_final, error_pos, pos_inter] = Move_debug(this, x)
-
+        function [pos_final, error_pos, pos_inter] = Move_debug(~, x)
             [pos_final, error_pos, pos_inter] = Move(x, true);
-
-            
-%             niter = 0;
-%             action = zeros(1,3);
-%             pos_inter = zeros(20,3);
-%             err = [900 900 900];
-%             max_accion = 300;
-%             toler = 20;
-% 
-%             if length(x) ~= 3
-%                 errordlg("Introduce un punto en el espacio (vector fila de 3 componentes)","Execution Error");
-%                 return
-%             end
-% 
-%             t_obj = this.net_pt(x');
-% 
-%             while (abs(err(1)) > toler || abs(err(2)) > toler || abs(err(3)) > toler) && niter < 20
-%                 niter = niter + 1;
-%                 pos_raw = this.CapturePosition;
-%                 pos_inter(niter,:) = pos_raw(2,:);
-% 
-%                 this.Measure();
-%                 pause(0.1)
-%                 vol_current = this.getVoltages();
-% 
-%                 t_current = this.net_vt(vol_current);
-%                 err = t_obj - t_current;
-%                 pause(0.1)
-% 
-%                 for i = 1:3
-%                     if err(i) > 0 
-%                         action(i) = min(err(i), max_accion);
-%                     else
-%                         action(i) = max(err(i), -max_accion);
-%                     end
-%                 end
-%             
-%                 this.WriteSegmentMillis(action);
-%                 pause(0.5)
-%             end
-% 
-%             pos_final_raw = this.CapturePosition;
-%             pos_final = pos_final_raw(2,:);
-%             error_pos = norm(pos_final - x);
-
         end
 
     end
