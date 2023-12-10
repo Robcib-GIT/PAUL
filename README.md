@@ -1,4 +1,4 @@
-# Robot blando continuo actuado neumaticamente
+# Pneumatic Soft Robotic Manipulator
 
 Bachelor's Thesis of the Bachelor's degree in Industrial Engineering. This project is about the design, manufacturing and programming of a pneumatic soft robotic manipulator, with the objective of controlling the position of the end. 
 
