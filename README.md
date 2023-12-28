@@ -1,7 +1,6 @@
-# Robot blando continuo actuado neumaticamente
+# Pneumatic Soft Robotic Manipulator
 
-Trabajo final de grado para el grado en ingeniería tecnologías Industriales consistente en el diseño y conformado de un robot manipulador blando actuado neumaticamente,
-así como la programación de un software para su respectivo control
+Bachelor's Thesis of the Bachelor's degree in Industrial Engineering. This project is about the design, manufacturing and programming of a pneumatic soft robotic manipulator, with the objective of controlling the position of the end. 
 
 ![image](https://user-images.githubusercontent.com/92983875/197029208-5e46d80d-6c36-4bec-9547-3e9aa1b69e1d.png)
 
@@ -9,18 +8,18 @@ así como la programación de un software para su respectivo control
 
 
 
-## Videos demostración: ##
+## Video demostration: ##
 
 https://www.youtube.com/watch?v=N3J1oKG8rpQ&list=PLF4WJaMT_8YeHmmFcZnSuC1azHqS5d0rf&index=5
 
-## Vídeo fabricación: ## 
+## Videos of the manufacturing process: ## 
 
 https://www.youtube.com/watch?v=WlBE3JDpxWw
 
-## Indice de carpetas ##
+## Directory index ##
 
-- Code_arduino: Codigo a bajo nivel que controla el banco de actuación utilizado
-- Code_matlab: Código a alto nivel en Matlab. Incluye la interfaz de control, todo lo relacionado con la visión por computador, la comunicación con el banco de actuación, etc...
-- CAD: Todos los ficheros cad del proyecto. Tanto del robot como de los moldes utilizados. Realizado en Autodesk Fusion 360
-- Memoria: Todo lo que incluye la memoria del proyecto realizada en latex
+- Code_arduino: Arduino code for controlling the pneumatic actuation bench, which sends the necessary compressed air to move the robot.
+- Code_matlab: Matlab code. It includes the control interface, where one can control everything related to computer vision, communications between the robot and the computer, the actuation signals, etc.
+- CAD: Everything related to the CAD designs, from the molds to the joints of the robot. They were designed using Autodesk Fusion 360.
+- Memoria: Everything related to the thesis documentation. 
 
