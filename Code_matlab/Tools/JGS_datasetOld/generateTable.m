@@ -8,7 +8,7 @@
 close all
 minD = 50;
 maxD = 1200;
-num = 3;
+num = 2;
 step = round((maxD - minD) / num);
 table = zeros([num^3, 6]);
 heads = zeros(num);

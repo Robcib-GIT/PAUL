@@ -32,26 +32,34 @@ end
 
 %% Dibujado
 
+% Configuración
+c = colormap(parula);
+mycolors = [c(1,:); c(43,:); c(86,:); c(129,:); c(215,:); c(256,:)];
+
 % Datos
 figure;
 hold on;
+ax1 = gca;
+ax1.ColorOrder = mycolors;
 for i = 1:size(datosAll, 1)
     plot(datosAll(i,525:1018));
 end
 leg1 = legend(legTxt, 'Location', 'north');
-leg1.Title.String = 'Temperatura (ºC)';
-xlabel('Pasos motor')
-ylabel('Tensión (V)')
-title('Evolución de la tensión en el sensor')
+leg1.Title.String = 'Temperature (ºC)';
+xlabel('Motor Steps')
+ylabel('Voltage (V)')
+title('Voltage evolution at the sensor')
 
 % Histéresis
 figure;
 hold on;
+ax2 = gca;
+ax2.ColorOrder = mycolors;
 for i = 1:size(datosAll, 1)
     plot(deltaAll(i,525:1018), datosAll(i,525:1018));
 end
 leg2 = legend(legTxt);
-leg2.Title.String = 'Temperatura (ºC)';
-xlabel('Elongación (mm)')
-ylabel('Tensión (V)')
-title('Tensión y elongación en el sensor')
+leg2.Title.String = 'Temperature (ºC)';
+xlabel('\Delta L (mm)')
+ylabel('Voltage (V)')
+title('Voltage evolution at the sensor')

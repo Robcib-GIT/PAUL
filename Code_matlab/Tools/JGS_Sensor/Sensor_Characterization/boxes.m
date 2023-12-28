@@ -32,5 +32,5 @@ groupping = [zeros(length(v1),1); ones(length(v2),1)];
 %% Gráfico de cajas
 figure;
 boxplot([v1';v2'], groupping, 'Labels', {'T < 29ºC','T > 29ºC'});
-title('Tensión media del sensor a diferentes temperaturas')
-ylabel('Tensión (V)')
+title('Average sensor voltage at different temperatures')
+ylabel('Voltage (V)')

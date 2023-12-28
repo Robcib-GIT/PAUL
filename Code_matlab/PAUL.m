@@ -8,7 +8,7 @@ classdef PAUL < handle
 
     properties (Access = public)
         serialDevice;                       % Serial port to which Arduino is connected
-        realMode = 1;                       % 1 if working with the real PAUL
+        realMode = 0;                       % 1 if working with the real PAUL
         deflatingTime = 1500;               % Default deflating time
         deflatingRatio = 2;                 % Relation between deflation and inflation time
         maxAction = 200;
@@ -201,9 +201,9 @@ classdef PAUL < handle
             this.OP_mode = 0;
            
             % Extrinsic parameters
-            tempX = load('par.mat','cameraParams_yz');
+            tempX = load('camera_parameters.mat','cameraParams_yz');
             this.cam.cameraParams_yz = tempX.cameraParams_yz;
-            tempX = load('par.mat','cameraParams_xz');
+            tempX = load('camera_parameters.mat','cameraParams_xz');
             this.cam.cameraParams_xz = tempX.cameraParams_xz;
             [this.cam.rotyz, this.cam.transyz] = findCameraPose(this.cam_yz, this.cam.cameraParams_yz);
             [this.cam.rotxz, this.cam.transxz] = findCameraPose(this.cam_xz, this.cam.cameraParams_xz);
@@ -233,6 +233,16 @@ classdef PAUL < handle
             % [pos2, pos] = PAUL.CapturePosition() also returns the
             % position expressed with respect to the cameras' reference
             % frame.
+
+            if ~this.realMode
+                nattempts = 0;
+                a = [0 90 0];
+                euler = [0 0 0];
+                pos = this.net_tpv(this.millisSentToValves(1:this.nSensors)');
+                pos_fixed = [pos(1:3)'; a; euler];
+                pos_rel = [pos_fixed(1:2,:) - this.base; euler];
+                return
+            end
             
             nattempts = 0;
             pos = [-1 -1 -1];
