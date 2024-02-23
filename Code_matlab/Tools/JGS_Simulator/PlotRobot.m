@@ -6,7 +6,12 @@
 % www.gsamartin.es
 % 2023-11-28
 
-function PlotRobot(times_obj)
+function PlotRobot(times_obj, r)
+
+    % Checking
+    if ~isrow(times_obj)
+        times_obj = times_obj';
+    end
 
     % Setup
     height = r.geom.height;
@@ -18,7 +23,7 @@ function PlotRobot(times_obj)
     % Drawing each segment
     figure
     for seg = 1:size(times_obj, 1)
-        [c1(seg), c2(seg), o2(seg)] =  PlotSegment(r, times_obj(seg,:), pos, o2(seg));
+        [c1(seg), c2(seg), o2(seg)] =  PlotSegment(r, times_obj(seg,:), pos, o2(seg,:));
         pos = c2(seg)' + height * (c2(seg) - c1(seg))' / norm(c2(seg) - c1(seg));
     end
 

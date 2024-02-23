@@ -373,6 +373,17 @@ classdef PAUL < handle
             pause(this.deflatingTime / 500);        % Pause works with seconds. A pause of 2 times the deflating time is done
         end
 
+        function WriteCycle(this, valv, millis)
+            % PAUL.WriteCycle(valv, millis) inflates valve valv during the
+            % number of milliseconds specified in millis and, after a pause
+            % of 100ms, defaltes it
+
+            this.WriteOneValveMillis(valv, millis);
+            pause(0.1);
+            this.WriteOneValveMillis(valv, -millis);
+
+        end
+
         function WriteOneValveMillis(this, valv, millis)
             % PAUL.WriteOneValveMillis(valv, millis) sends to valve valv
             % air during the time specified in millis.
@@ -700,7 +711,7 @@ classdef PAUL < handle
             % of each intermediate base (c1 for the bottom of the
             % connectors and c2 for the top)
             %
-            % [p, c1, c2] = PAUL.Plot(times_obj) also returns the
+            % [p, c1, c2, o2] = PAUL.Plot(times_obj) also returns the
             % orientation of each intermediate base, in Euler angles.
 
             % Setup
@@ -783,12 +794,13 @@ classdef PAUL < handle
 
 
         %% Control of a single segment
-        function [pos_final, error_pos, pos_inter] = Move(this, x, DEBUG)
+        function [pos_final, error_pos, pos_inter, millis_inter] = Move(this, x, DEBUG)
             % [pos_final, error_pos] = PAUL.Move(x) moves the PAUL to an
             % specified point (x) in the workspace of PAUL.
             %
-            % [pos_final, error_pos, pos_inter] = PAUL.Move(x, true) allows
-            % keeping a register of all the intermediate positions.
+            % [pos_final, error_pos, pos_inter, millis_inter] = PAUL.Move(x, true) allows
+            % keeping a register of all the intermediate positions and
+            % inflation times.
 
             if nargin == 2
                 DEBUG = false;
@@ -797,15 +809,17 @@ classdef PAUL < handle
             niter = 0;
             t1 = datetime('now');
             action = zeros(1,3);
-            pos_inter = zeros(20,3);
-            err = [900 900 900];
+            itMax = 10;
+            pos_inter = zeros(itMax,3);
+            millis_inter = zeros(itMax,this.nValves);
+            err = [900 900 900]';
             err_prev = err;
             max_accion = 300;
             toler = 40;
 
             % PID Parameteres
             Kp = 1;
-            Kd = 0.01;
+            Kd = 0;
             Ki = 0;
 
             if length(x) ~= 3
@@ -815,7 +829,7 @@ classdef PAUL < handle
 
             t_obj = this.net_pt(x');
 
-            while (abs(err(1)) > toler || abs(err(2)) > toler || abs(err(3)) > toler) && niter < 10
+            while (abs(err(1)) > toler || abs(err(2)) > toler || abs(err(3)) > toler) && niter < itMax
                 
                 t2 = datetime('now');
                 dt = seconds(t2 - t1);
@@ -861,6 +875,10 @@ classdef PAUL < handle
                 if this.realMode
                     pause(0.5)
                 end
+                if DEBUG
+                    millis_inter(niter,1:length(action)) = action;
+                end
+
             end
 
             if this.realMode

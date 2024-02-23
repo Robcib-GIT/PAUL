@@ -3,12 +3,12 @@
 % Plot one segment of PAUL and its bases, assuming the PCC model hypothesis
 % with base at pos and orientation or
 %
-% [c1, c2, o2] = PlotSegment(a, times) plots a segment for robot r (PAUL type) and
+% [c1, c2, o2] = PlotSegment(r, times) plots a segment for robot r (PAUL type) and
 % bladders infated during times (in milliseconds). It returns the centres
 % of the circles of the base and the bottom and the orientation of the
 % bottom, in Euler angles
 % 
-% [c1, c2, o2] = PlotSegment(a, times, pos, or) locates the base at position pos and
+% [c1, c2, o2] = PlotSegment(r, times, pos, or) locates the base at position pos and
 % rotates it an orientation or
 %
 % Jorge F. García-Samartín

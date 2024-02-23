@@ -2,7 +2,7 @@
 %
 % Jorge F. García-Samartín
 % www.gsamartin.es
-% 2023-12-11
+% 2024-01-15
 
 % Example data (replace with your actual data)
 inputSize = 1;
@@ -19,8 +19,8 @@ layers = [
     fullyConnectedLayer(100)
     reluLayer
     fullyConnectedLayer(2)
-    regressionLayer
 ];
+lGraph = layerGraph(layers);
 
 % Set training options (you can customize this based on your requirements)
 options = trainingOptions( ...
@@ -30,8 +30,9 @@ options = trainingOptions( ...
     'Plots', 'training-progress' ...
     );
 
-% Train the neural network
-net = trainNetwork(inputData, targetData, layers, options);
+% Create and rain the neural network
+net = dlnetwork(lgraph)
+[loss, gradients] = dlfeval(@compute_gradient, net, x);
 
 % Plot results
 y = predict(net, inputData);

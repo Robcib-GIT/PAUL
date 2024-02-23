@@ -18,11 +18,11 @@ for i = 1:maxIt
     r.WriteOneValveMillis(2, 100);
     poses_aux = r.CapturePosition();
     poses(i,:) = (r.R * poses_aux(1,1:3)')';
-    diff(i,:) = poses(i,:) - (r.R * or')';
+    %diff(i,:) = poses(i,:) - (r.R * or')';
     %angles(i) = acos((poses(i,3) - or(3)) / norm(poses(i,:) - or));
     %angles(i) = atan2(diff(i,3), norm(diff(i,1:2)));
     %angles(i) = acos(poses(i,:) * poses(1,:)' / norm(poses(i,:)) / norm(poses(1,:)));
-    angles(i) = atan2(norm(poses(i,1:2) - poses(1,1:2)), -poses(i,3)); % Babu2019
+    angles(i) = atan2(norm(poses(i,1:2) - poses(1,1:2)), -poses(i,3));
 end
 
 figure
