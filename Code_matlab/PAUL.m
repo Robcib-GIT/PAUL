@@ -379,7 +379,7 @@ classdef PAUL < handle
             % of 100ms, defaltes it
 
             this.WriteOneValveMillis(valv, millis);
-            pause(0.1);
+            pause(millis/1000);
             this.WriteOneValveMillis(valv, -millis);
 
         end
@@ -722,10 +722,9 @@ classdef PAUL < handle
             c2 = zeros(size(c1));
             
             % Drawing each segment
-            figure
             for seg = 1:size(times_obj, 1)
                 [c1(seg,:), c2(seg,:), o2(seg+1,:)] =  this.PlotSegment(times_obj(seg,:), pos, o2(seg,:));
-                pos = c2(seg,:) + height * (c2(seg,:) - c1(seg,:))/ norm(c2(seg,:) - c1(seg,:));
+                pos = c2(seg,:) + height * (c2(seg,:) - c1(seg,:) )/ norm(c2(seg,:) - c1(seg,:));
             end
 
             % Returning values
