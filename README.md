@@ -1,6 +1,6 @@
-# Pneumatic Soft Robotic Manipulator
+# Pneumatic Actuated Ultrasoft Limb (PAUL)
 
-Bachelor's Thesis of the Bachelor's degree in Industrial Engineering. This project is about the design, manufacturing and programming of a pneumatic soft robotic manipulator, with the objective of controlling the position of the end. 
+In this repository you will find all the code necessary for the control of the PAUL soft robot. Due to the problems that can be associated with working with it and the difficulty of building it, it is also possible to work using a built-in simulator. The programming language used is Matlab.
 
 ![image](https://user-images.githubusercontent.com/92983875/197029208-5e46d80d-6c36-4bec-9547-3e9aa1b69e1d.png)
 
