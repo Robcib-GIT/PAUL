@@ -632,7 +632,7 @@ classdef PAUL < handle
         
         end
 
-        function [c1, c2, o2] = PlotSegment(this, times_obj, pos, or)
+        function [c1, c2, o2] = PlotSegment(this, times_obj, pos, or, showFigure)
             % Plot one segment of PAUL and its bases, assuming the PCC model hypothesis
             % with base at pos and orientation or
             %
@@ -643,18 +643,28 @@ classdef PAUL < handle
             % 
             % [c1, c2, o2] = PAUL.PlotSegment(a, times, pos, or) locates the base at position pos and
             % rotates it an orientation or
+            %
+            % [c1, c2, o2] = PAUL.PlotSegment(a, times, pos, or, false)
+            % does not make any visible plot
 
             switch nargin
+                case 5
+                    if ~iscolumn(pos)
+                        pos = pos';
+                    end
                 case 4
                     if ~iscolumn(pos)
                         pos = pos';
                     end
+                    showFigure = true;
                 case 3
+                    showFigure = true;
                     or = [0 0 0];
                     if ~iscolumn(pos)
                         pos = pos';
                     end
                 case 2
+                    showFigure = true;
                     or = [0 0 0];
                     pos = [0 0 0]';
             end
@@ -662,6 +672,7 @@ classdef PAUL < handle
             % Kinematics
             a = this.geom.radius;
             RotM = eul2rotm(or);
+            Raux = [0 1 0; -1 0 0; 0 0 1];
         
             pos_obj = this.net_tpv(times_obj');
             [length, ~] = this.MCI(this.R * pos_obj(1:3));
@@ -669,27 +680,31 @@ classdef PAUL < handle
         
             rho = 1 / params.kappa;
             theta = params.kappa * params.lr;
-                
-            % Drawing
-            axis equal
-            hold on
-            grid on
         
             centre = [rho*cos(params.phi), rho*sin(params.phi), 0]';
             [~,c] = circle(centre, rho, theta, params.phi);
-            c = RotM*c + pos;
-            plot3(c(1,:), c(2,:), c(3,:));
+            c = Raux*RotM*c + pos;
+                
+            % Drawing
+            if showFigure
+                axis equal
+                hold on
+                grid on
+                plot3(c(1,:), c(2,:), c(3,:));
+            end
             
             % Base and final
-            s = 0:pi/50:2*pi;
-            circ = a * [cos(s);sin(s);zeros(size(s))];
-            circ = RotM*circ + pos;
-            plot3(circ(1,:),circ(2,:),circ(3,:),'k')
-        
-            circ = c(:,end) - a * RotM * T(1:3,1:3) * [cos(s);sin(s);zeros(size(s))];
-            plot3(circ(1,:),circ(2,:),circ(3,:),'k')
-        
-            hold off
+            if showFigure
+                s = 0:pi/50:2*pi;
+                circ = a * [cos(s);sin(s);zeros(size(s))];
+                circ = RotM*circ + pos;
+                plot3(circ(1,:),circ(2,:),circ(3,:),'k')
+            
+                circ = c(:,end) - a * RotM * T(1:3,1:3) * [cos(s);sin(s);zeros(size(s))];
+                plot3(circ(1,:),circ(2,:),circ(3,:),'k')
+            
+                hold off
+            end
         
             % Centres of the bases
             c1 = c(:,1)';
@@ -698,21 +713,30 @@ classdef PAUL < handle
         
         end
 
-        function [p, c1, c2, o2] = Plot(this, times_obj)
-            % p = PAUL.Plot(times_obj) plots PAUL orientation and position
+        function [p, c1, c2, o2] = Plot(this, times_obj, showFigure)
+            % p = PAUL.Plot(times_obj, true) plots PAUL orientation and position
             % for each segment when inflating the bladders the milliseconds
             % specified in times_obj and returns the position of the final
             % tip (the centre of the bottom base)
             % Variable times_objs must contain a row per segment and in
             % each column of the row, the inflation team of the
             % corresponding bladder.
+            % If the second variable takes the value false, no plot will be
+            % displayed, only the calculations will be done.
             %
-            % [p, c1, c2] = PAUL.Plot(times_obj) also returns the position
+            % [p, c1, c2] = PAUL.Plot(times_obj, true) also returns the position
             % of each intermediate base (c1 for the bottom of the
             % connectors and c2 for the top)
             %
-            % [p, c1, c2, o2] = PAUL.Plot(times_obj) also returns the
+            % [p, c1, c2, o2] = PAUL.Plot(times_obj, true) also returns the
             % orientation of each intermediate base, in Euler angles.
+            
+            switch nargin
+                case 2
+                    showFigure = true;
+                case 1
+                    error('At least three times must be provided')
+            end
 
             % Setup
             height = this.geom.height;
@@ -723,7 +747,7 @@ classdef PAUL < handle
             
             % Drawing each segment
             for seg = 1:size(times_obj, 1)
-                [c1(seg,:), c2(seg,:), o2(seg+1,:)] =  this.PlotSegment(times_obj(seg,:), pos, o2(seg,:));
+                [c1(seg,:), c2(seg,:), o2(seg+1,:)] =  this.PlotSegment(times_obj(seg,:), pos, o2(seg,:), showFigure);
                 pos = c2(seg,:) + height * (c2(seg,:) - c1(seg,:) )/ norm(c2(seg,:) - c1(seg,:));
             end
 
@@ -731,11 +755,13 @@ classdef PAUL < handle
             p = c2(end,:);
         
             % Plot settings
-            xlabel('x')
-            ylabel('y')
-            zlabel('z')
-            grid on
-            view(145, 9);
+            if showFigure
+                xlabel('x')
+                ylabel('y')
+                zlabel('z')
+                grid on
+                view(145, 9);
+            end
         
         end
 

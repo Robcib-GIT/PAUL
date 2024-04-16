@@ -9,15 +9,18 @@ if ~exist('r', 'var')
     PAUL_setup();
 end
 
-
 % Setup
 nData = size(pos,1);
 orList = zeros(nData, 3);
+
+% Correcting the data
+pos = (r.R * pos')';
 
 % Dataset generation
 for p = 1:nData
     [~, ~, o2] = r.PlotSegment(t(p,:));
     orList(p,:) = o2;
+    disp(p)
 end
 
 % Training the network
