@@ -11,20 +11,27 @@ classdef Scara < handle
     end
     
     methods
-        function [c1, c2, o2] = PlotSegment(this, angles, pos, or)
+        function [c1, c2, o2] = PlotSegment(this, angles, pos, or, showFigure)
             switch nargin
+                case 5
+                    if ~iscolumn(pos)
+                        pos = pos';
+                    end
                 case 4
                     if ~iscolumn(pos)
                         pos = pos';
                     end
+                    showFigure = true;
                 case 3
                     or = [0 0];
                     if ~iscolumn(pos)
                         pos = pos';
                     end
+                    showFigure = true;
                 case 2
                     or = [0 0];
                     pos = [0 0]';
+                    showFigure = true;
             end
         
             % Kinematics
@@ -41,21 +48,24 @@ classdef Scara < handle
 
                 
             % Drawing
-            axis equal
-            hold on
-            grid on
-    
-            plot([c1(1) c(1)], [c1(2) c(2)], '-b')
-            plot(c1(1), c1(2), 'or')
-            plot(c(1), c(2), 'or')
+            if showFigure
+                axis equal
+                hold on
+                grid on
+        
+                plot([c1(1) c(1)], [c1(2) c(2)], '-b')
+                plot(c1(1), c1(2), 'or')
+                plot(c(1), c(2), 'or')
+            end
         
             % Centres of the bases
             c1 = c1';
             c2 = c;
             o2 = wrapTo2Pi(atan2(Ang(2,1), Ang(1,1)));
+     
         end
     
-        function [p, c1, c2, o2] = Plot(this, angles)
+        function [p, c1, c2, o2] = Plot(this, angles, showFigure)
             
             pos = [0 0];
             o2 = zeros(size(angles, 1) + 1, 1);
@@ -64,20 +74,23 @@ classdef Scara < handle
     
             % Drawing each segment
             for seg = 1:size(angles, 1)
-                [c1(seg,:), c2(seg,:), o2(seg+1,:)] =  this.PlotSegment(angles(seg,:), pos, o2(seg,:));
+                [c1(seg,:), c2(seg,:), o2(seg+1,:)] =  this.PlotSegment(angles(seg,:), pos, o2(seg,:), showFigure);
                 pos = c2(seg,:);
             end
     
             % Returning values
             p = c2(end,:);
-
-            % Base
-            plot(0, 0, '^r', 'MarkerSize', 10)
-        
-            % Plot settings
-            xlabel('x')
-            ylabel('y')
-            grid on
+            
+            % Plotting
+            if showFigure
+                % Base
+                plot(0, 0, '^r', 'MarkerSize', 10)
+            
+                % Plot settings
+                xlabel('x')
+                ylabel('y')
+                grid on
+            end
         end
     end
 end
