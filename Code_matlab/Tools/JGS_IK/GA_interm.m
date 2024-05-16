@@ -16,7 +16,8 @@ s = r;
 
 %% Setup parameters
 times_goal = [0 250 0; 700 0 0; 0 500 350];
-goal = r.Plot(times_goal, false);
+[~, ~, goal, ~] = r.Plot(times_goal, false);
+goal(2,1) = NaN;
 
 % Limits
 options.nvars = 9;
@@ -25,12 +26,11 @@ options.ub = 900 * ones(1, options.nvars);
 
 % Initial Point
 current_times = [0 0 0; 0 0 0; 0 0 0];
-current_times = times_goal - [0 100 0; 20 0 0; 0 0 0];
 current_times = reshape(current_times, [1 options.nvars]);
 
 % Options
 options.Display = "diagnose";
-options.MaxGenerations = 20;
+options.MaxGenerations = 50;
 options.FitnessLimit = 1;
 options.PopulationSize = 50;
 options.pNorm = 2;
@@ -68,7 +68,7 @@ for it = 1:options.MaxGenerations
     end
 
     for ind = evStart:options.PopulationSize
-        fitness(ind,2) = GADistance(individuals(ind,:), goal, options.pNorm);
+        fitness(ind,2) = GADistanceInterm(individuals(ind,:), goal, options.pNorm);
     end
     
     % Best individual
@@ -149,7 +149,7 @@ disp(goal)
 disp('Reached position:')
 disp(p)
 disp('Error:')
-disp(norm(p-goal));
+disp(norm(p-goal(end,:)));
 
 %% Aux Functions
 % Generation function
@@ -192,11 +192,11 @@ function dist = GADistance(times, xd, pNorm)
 end
 function dist = GADistanceInterm(times, xd, pNorm)
     global s
-    alpha = 0.1;
+    alpha = 0.3;
     times = reshape(times, 3, 3);
     [~, ~, c2, ~] = s.Plot(times, false);
     dif = c2 - xd;
     dif = rmmissing(dif);
     dif(1:end-1,:) = dif(1:end-1,:) * alpha;
-    dist = vecnorm(dist')';
+    dist = norm(vecnorm(dif', pNorm));
 end

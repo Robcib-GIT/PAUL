@@ -765,6 +765,19 @@ classdef PAUL < handle
         
         end
 
+        function p = GetCompletePosition(this, times)
+            % p = PAUL.GetCompletePosition(times) returns position of the
+            % bottom of each segment of the robot (what in PAUL.Plot is
+            % called c2) when inflating times
+            
+            % If times are given in a vector
+            if length(times) == this.nValves
+                times = reshape(times, this.nValves/3, 3)';
+            end
+            [~, ~, c2, ~]  = this.Plot(times, false);
+            p = reshape(c2', 1, 9);
+        end
+
         %% Neural Network
         function [perform_pt, perform_vt, perform_st] = NN_training(this, pos, volt, tiempo, capas_pt, capas_vt, capas_st)
             % [perform_pt, perform_vt, perform_st] = PAUL.NN_training(pos, volt,

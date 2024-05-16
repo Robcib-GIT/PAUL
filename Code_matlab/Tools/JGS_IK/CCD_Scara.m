@@ -1,4 +1,4 @@
-  %% CCD
+%% CCD
 % 
 % Cyclic Coordinate Descent Algorithm
 %
