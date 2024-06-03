@@ -7,6 +7,7 @@
 % 2024-02-14
 
 close all
+clear
 
 if ~exist('r', 'var')
     r = Scara();
@@ -29,7 +30,7 @@ s = nSegments;
 for i = 1:maxIt
     
     clf
-    [p, c1, c2, o2]  = r.Plot(total_millis);
+    [p, c1, c2, o2]  = r.Plot(total_millis, false);
     plot(goal(1), goal(2), 'xb', 'MarkerSize', 10)
     xlim([-20 40])
     ylim([-20 20])
@@ -83,9 +84,8 @@ end
 
 disp(errHist)
 
-if plotInt
-    figure
-    [p, c1, c2, o2]  = r.Plot(total_millis);
+if ~plotInt
+    [p, c1, c2, o2]  = r.Plot(total_millis, true);
     plot(goal(1), goal(2), 'xb', 'MarkerSize', 10)
     xlim([-20 40])
     ylim([-20 20])

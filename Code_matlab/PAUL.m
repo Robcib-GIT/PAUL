@@ -15,6 +15,8 @@ classdef PAUL < handle
         max_millis = 1000;
         nValves = 9;                        % Number of valves
         nSensors = 3;                       % Number of sensors
+        nSegments = 3;                      % Number of segments
+        nValvesPerSegment = 0;              % Number of valves per segment
         base = [0 0 0];                     % Position of the centre of the basis (in cameras'coordinates)
         bottom = [0 0 0];                   % Position of the centre of the bottom (in cameras'coordinates)
         origin = zeros(5,3);                % Initial positions and orientation of red, green and blue dots
@@ -79,6 +81,7 @@ classdef PAUL < handle
             this.millisSentToValves = zeros(1, this.nValves);
             this.voltages = zeros(this.nSensors, 1);
             this.positions = zeros(6, 1);
+            this.nValvesPerSegment = floor(this.nValves / this.nSegments);
 
             % Geometric parameters
             this.geom.trihDistance = 77;                    % Distance (mm) from the centre of the green ball to the centre of the bottom of the PAUL
@@ -632,6 +635,229 @@ classdef PAUL < handle
         
         end
 
+        function [t, x, res] = GA(this, xd, options)
+            % Calculate the IK of a n-module PAUL using genetic algorithms
+            %
+            % t = PAUL.GA(xd) returns the times needed to reach position xd.
+            % This position can be a 1x3 array containing the desired
+            % position of final tip of a Nx3 array (with N =
+            % PAUL.nSegments) in which all the intermediate positions are
+            % specified. If some intermediate position does not have to be
+            % specified, at least one of the elements of the row should be
+            % a NaN
+            %
+            % t = PAUL.GA(xd, options) allows to customise algorithm
+            % options. Fields of options structure are:
+            %   options.lb: lower limits for times generation
+            %   options.ub: upper limits for times generation
+            %   options t0: point around of it the generation wil be done
+            %   options.Display: "diagnose" to show all the information of
+            %   the process, "final" for just show final information,
+            %   "none" for not showing anything.
+            %   options.MaxGenerations: maximum number of generations
+            %   options.FitnessLimit: maximum distance (measured in options.pNorm)
+            %   between xd and the reached solution to exit the algorithm.
+            %   options.PopulationSize: number of individuals
+            %   options.pNorm: norm used for the fitness evaluation
+            %   options.NParents: number of parents
+            %   options.CrossoverFraction: crossover fraction (from 0 to 1)
+            %   options.MutationFraction: mutation probability (from 0 to
+            %   1)
+            % 
+            % [t, x, res] = PAUL.GA(xd) also returns the reached position
+            % x, and a struct res, containing two elements:
+            %   res.error: error (measured in norm 2), between x and xd,
+            %   only considering final tip position
+            %   res.conv: returns true if algorithm has converged (error
+            %   less than options.FitnessLimit) and false otherwise
+            %   res.it: number of iterations of the algorithm
+
+            % Default options
+            opt.nvars = this.nValves;
+            opt.lb = zeros(1, opt.nvars);
+            opt.ub = 900 * ones(1, opt.nvars);
+            opt.t0 = zeros(1, opt.nvars);
+            opt.Display = "none";
+            opt.MaxGenerations = 20;
+            opt.FitnessLimit = 1;
+            opt.PopulationSize = 50;
+            opt.pNorm = 2;
+            opt.NParents = floor(opt.PopulationSize * 0.2);
+            opt.CrossoverFraction = 1;
+            opt.MutationFraction = 0.7;
+            
+            % Manage no options or if not all the options are defined
+            switch nargin
+                case 2
+                    options = opt;
+                case 3
+                    fields = fieldnames(opt);
+                    for f = 1:numel(fields)
+                        if ~isfield(options, fields{f})
+                            options.(fields{f}) = opt.(fields{f});
+                        end
+                    end
+            end
+
+            % Adjusting xd (if size is different, only the last joints are
+            % going to be considered)
+            x_aux = nan(this.nSegments, this.nValvesPerSegment);
+            sz = size(xd, 1);
+            x_aux(end-sz+1:end,:) = xd;
+            xd = x_aux;
+
+            % Auxiliary variables
+            fitness = zeros(options.PopulationSize, 2);
+            fitness(:,1) = 1:options.PopulationSize;
+
+            % Running GA
+            if options.Display == "diagnose"
+            end
+            
+            % Generation
+            if ~any(options.t0)
+                individuals = this.GenerateUniform(options);
+            else
+                individuals = this.GenerateFromCurrent(options);
+            end
+            
+            % Loop
+            if options.Display == "diagnose"
+                t1 = datetime('now');
+                disp(['Iteration ' 'Time ' 'Best ' 'Average ' ])
+            end
+            for it = 1:options.MaxGenerations
+                % Iteration count (for statistics)
+                res.it = it;
+            
+                % Selection
+                if it == 1
+                    evStart = 1;
+                else
+                    evStart = options.NParents+1;
+                end
+            
+                for ind = evStart:options.PopulationSize
+                    fitness(ind,2) = this.GADistanceInterm(individuals(ind,:), xd, options.pNorm);
+                end
+                
+                % Best individual
+                M = min(fitness(:,2));
+            
+                if M < options.FitnessLimit
+                    break
+                end
+            
+                % For statistics
+                a = mean(fitness(:,2));
+                
+                % Selection
+                fitOrd = sortrows(fitness, 2, 'ascend');
+                parents = fitOrd(1:options.NParents, 1);
+                individuals(1:options.NParents,:) = individuals(parents,:);
+            
+                % To not evaluate parents again
+                fitness(1:options.NParents,2) = fitOrd(1:options.NParents,2);
+            
+                % Crossover and mutation
+                for ind = options.NParents:options.PopulationSize
+            
+                    % Selecting the parents
+                    p1 = randi([1 options.NParents]);
+                    p2 = p1;
+                    while p2 == p1
+                        p2 = randi([1 options.NParents]);
+                    end
+            
+                    % Performing crossover
+                    individuals(ind,:) = mean([individuals(p1,:); individuals(p2,:)]);
+            
+                    % Mutation
+                    q = rand();
+                    if q < options.MutationFraction 
+                        individuals(ind,:) = individuals(ind,:) .* randBtw(0.9, 1.1, 1, options.nvars);
+                    end
+            
+                    % Checking limits
+                    individuals(ind,:) = max(individuals(ind,:), options.lb);
+                    individuals(ind,:) = min(individuals(ind,:), options.ub);
+                end
+            
+                % Statistics
+                if options.Display == "diagnose"
+                    t2 = datetime('now');
+                    t = seconds(t2-t1);
+                    disp([it t M a])
+                    t1 = datetime('now');
+                end
+            end
+            
+            % Best solution
+            best = find(fitness(:,2) == M, 1);
+            t = individuals(best,:);
+            [~, ~, x, ~] = this.Plot(reshape(t, this.nSegments, this.nValvesPerSegment), false);
+            res.error = norm(x(end,:) - xd(end,:));
+            if res.error < options.FitnessLimit
+                res.conv = true;
+            else
+                res.conv = false;
+            end
+
+            if options.Display == "diagnose" || options.Display == "final"
+                disp('Desired position:')
+                disp(xd)
+                disp('Reached position:')
+                disp(x)
+                disp('Error:')
+                disp(res.error);
+            end
+
+        end
+
+        % Genetic Algorithm  Generation function
+        function individuals = GenerateUniform(~, options)
+            individuals = zeros(options.PopulationSize, options.nvars);
+            for ind = 1:size(individuals, 1)
+                random_values = rand(1, options.nvars);
+                individuals(ind,:) = options.lb + random_values .* (options.ub - options.lb);
+            end
+        end
+        
+        function individuals = GenerateFromCurrent(~, options)
+            area = max(options.ub - options.lb);
+            individuals = zeros(options.PopulationSize, options.nvars);
+            ind = options.PopulationSize;
+            discarded = 0;
+            while ind 
+                if discarded >= 2 * options.PopulationSize
+                    individuals = GenerateUniform(options);
+                    disp('Generation from current point not working. Switching to Uniform Generation')
+                    return
+                else
+                    individuals(ind,:) = options.t0 + 0.3 * area * randn(1,options.nvars);
+                    if sum(individuals(ind,:) > options.ub) || sum(individuals(ind,:) < options.lb)
+                        discarded = discarded + 1;
+                        continue
+                    end
+                    ind = ind - 1;
+                end
+            end
+            disp(discarded);
+        end
+
+        % Genetic Algorithm Fitness function
+        function dist = GADistanceInterm(this, times, xd, pNorm)
+            alpha = 0.3;
+            times = reshape(times, this.nSegments, this.nValvesPerSegment);
+            [~, ~, c2, ~] = this.Plot(times, false);
+            dif = c2 - xd;
+            dif = rmmissing(dif);
+            dif(1:end-1,:) = dif(1:end-1,:) * alpha;
+            dist = norm(vecnorm(dif', pNorm));
+        end
+
+        %% Plotting
+
         function [c1, c2, o2] = PlotSegment(this, times_obj, pos, or, showFigure)
             % Plot one segment of PAUL and its bases, assuming the PCC model hypothesis
             % with base at pos and orientation or
@@ -679,7 +905,8 @@ classdef PAUL < handle
             [T, params] = this.MCD(length, a);
         
             rho = 1 / params.kappa;
-            theta = params.kappa * params.lr;
+            theta = max(params.kappa * params.lr, pi/5000);
+            %theta = params.kappa * params.lr;
         
             centre = [rho*cos(params.phi), rho*sin(params.phi), 0]';
             [~,c] = circle(centre, rho, theta, params.phi);

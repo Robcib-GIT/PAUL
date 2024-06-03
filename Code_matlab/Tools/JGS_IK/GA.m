@@ -42,6 +42,8 @@ options.MutationFraction = 0.7;
 fitness = zeros(options.PopulationSize, 2);
 fitness(:,1) = 1:options.PopulationSize;
 
+%[t, x, res] = r.GA(goal, options)
+
 %% Running GA
 
 if options.Display == "diagnose"
@@ -198,5 +200,5 @@ function dist = GADistanceInterm(times, xd, pNorm)
     dif = c2 - xd;
     dif = rmmissing(dif);
     dif(1:end-1,:) = dif(1:end-1,:) * alpha;
-    dist = vecnorm(dist')';
+    dist = vecnorm(dif')';
 end

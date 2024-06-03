@@ -13,9 +13,9 @@ x = datasetPos(:,1:18);
 t = datasetPos(:,19:27);
 
 % Setup parameters
-trainLim = 1800;
+trainLim = size(datasetPos,1) - 150;
 
 % PT Network
-npt = feedforwardnet(100);
+npt = feedforwardnet(500);
 npt = train(npt, x(1:trainLim,:)', t(1:trainLim,:)');
 p = perform(npt,t(trainLim+1:end,:)',npt(x(trainLim+1:end,:)'));
