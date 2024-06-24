@@ -917,7 +917,7 @@ classdef PAUL < handle
                 axis equal
                 hold on
                 grid on
-                plot3(c(1,:), c(2,:), c(3,:));
+                plot3(c(1,:), c(2,:), c(3,:), 'k');
             end
             
             % Base and final
@@ -983,11 +983,12 @@ classdef PAUL < handle
         
             % Plot settings
             if showFigure
-                xlabel('x')
-                ylabel('y')
-                zlabel('z')
+                xlabel('x (mm)')
+                ylabel('y (mm)')
+                zlabel('z (mm)')
                 grid on
                 view(145, 9);
+
             end
         
         end
