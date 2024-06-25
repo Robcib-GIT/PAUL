@@ -6,20 +6,28 @@ In this repository you will find all the code necessary for the control of the P
 
 ![image](https://user-images.githubusercontent.com/92983875/197028795-6f54991a-0070-4044-a94e-e584cdc8ee79.png)
 
+## Available videos ##
 
+[Manufacturing Process] (https://www.youtube.com/watch?v=WlBE3JDpxWw)
+[General Working] (https://www.youtube.com/watch?v=1XM6AjTwlqs)
+[One Module Control] (https://www.youtube.com/watch?v=sqhGBfGOFts)
 
-## Video demostration: ##
+## Inverse Kinematics ##
 
-https://www.youtube.com/watch?v=N3J1oKG8rpQ&list=PLF4WJaMT_8YeHmmFcZnSuC1azHqS5d0rf&index=5
+We are currently working on the development of several inverse kinematics methods. We will post updates here when they reach a first functional level.
 
-## Videos of the manufacturing process: ## 
+Although we are open to explore different possibilities, we consider, for the moment, to use optimisation-based algorithms (such as CCD or FABRIK), search methods (type A*), genetic algorithms and, of course, reinforcement learning.
 
-https://www.youtube.com/watch?v=WlBE3JDpxWw
+### Genetic Algorithm
+
 
 ## Directory index ##
 
 - Code_arduino: Arduino code for controlling the pneumatic actuation bench, which sends the necessary compressed air to move the robot.
 - Code_matlab: Matlab code. It includes the control interface, where one can control everything related to computer vision, communications between the robot and the computer, the actuation signals, etc.
 - CAD: Everything related to the CAD designs, from the molds to the joints of the robot. They were designed using Autodesk Fusion 360.
-- Memoria: Everything related to the thesis documentation. 
+- Memoria: Everything related to the thesis documentation.
 
+## Published works ##
+García-Samartín, J.F.; Rieker, A.; Barrientos, A. Design, Manufacturing, and Open-Loop Control of a Soft Pneumatic Arm. _Actuators_ **2024**, 13, 36. https://doi.org/10.3390/act13010036
+García-Samartín, J.F.; Molina-Gómez, R.; Barrientos, A. Model-Free Control of a Soft Pneumatic Segment. _Biomimetics_ **2024**, 9, 127. https://doi.org/10.3390/biomimetics9030127
