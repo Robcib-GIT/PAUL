@@ -20,6 +20,11 @@ Although we are open to explore different possibilities, we consider, for the mo
 
 ### Genetic Algorithm
 
+The algorithm developed here achieves errors of less than 1mm with execution times fast enough for soft robots. Contrary to what happens in many methodologies, the algorithm allows the position of the robot's intermediate modules to be chosen.
+
+The hyperparameters have been decided starting from those established [in this work](https://www.mdpi.com/2075-1702/11/10/952) and then making small variations with the aim of finding a solution capable, at the same time, of achieving good precision in low times.
+
+The following table shows the results of the hyperparameter optimisation. The number of individuals, % elitism and % mutation have been varied and error and execution time have been compared for the genetic algorithm without shape control.
 
 ## Directory index ##
 
