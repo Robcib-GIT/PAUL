@@ -8,9 +8,9 @@ In this repository you will find all the code necessary for the control of the P
 
 ## Available videos ##
 
-[Manufacturing Process] (https://www.youtube.com/watch?v=WlBE3JDpxWw)
-[General Working] (https://www.youtube.com/watch?v=1XM6AjTwlqs)
-[One Module Control] (https://www.youtube.com/watch?v=sqhGBfGOFts)
+- [Manufacturing Process](https://www.youtube.com/watch?v=WlBE3JDpxWw)
+- [General Working](https://www.youtube.com/watch?v=1XM6AjTwlqs)
+- [One Module Control](https://www.youtube.com/watch?v=sqhGBfGOFts)
 
 ## Inverse Kinematics ##
 
