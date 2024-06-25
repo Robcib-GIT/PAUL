@@ -24,7 +24,34 @@ The algorithm developed here achieves errors of less than 1mm with execution tim
 
 The hyperparameters have been decided starting from those established [in this work](https://www.mdpi.com/2075-1702/11/10/952) and then making small variations with the aim of finding a solution capable, at the same time, of achieving good precision in low times.
 
-The following table shows the results of the hyperparameter optimisation. The number of individuals, % elitism and % mutation have been varied and error and execution time have been compared for the genetic algorithm without shape control.
+The following table shows the results of the hyperparameter optimisation. The number of individuals and elitism and mutation rates have been varied. For each hyperparameter setup, the algorithm has been runned 40 times. For all of them, median error and execution time have been compared for the genetic algorithm without shape control.
+
+| # of individuals | Parents' rate | Mutation rate | Median error (mm) | Median time (s) |
+| --- | --- | --- | --- | --- | 
+| 25 | 0.1 | 0.7 | 1.30 | 3.68 | 
+| 25 | 0.1 | 0.8 | 1.33 | 3.91 | 
+| 25 | 0.2 | 0.7 | 1.31 | 3.42 | 
+| 25 | 0.2 | 0.8 | 1.36 | 3.42 | 
+| 25 | 0.3 | 0.7 | 1.07 | 3.05 | 
+| 25 | 0.3 | 0.8 | 1.99 | 3.14 | 
+| 50 | 0.1 | 0.7 | 0.91 | 6.19 | 
+| 50 | 0.1 | 0.8 | 0.90 | 4.56 | 
+| **50** | **0.2** | **0.7** | **0.88** | **4.31** | 
+| 50 | 0.2 | 0.8 | 0.88 | 4.81 | 
+| 50 | 0.3 | 0.7 | 0.99 | 6.12 | 
+| 50 | 0.3 | 0.8 | 0.90 | 5.03 | 
+| 75 | 0.1 | 0.7 | 0.86 | 5.40 | 
+| 75 | 0.1 | 0.8 | 0.82 | 5.37 | 
+| 75 | 0.2 | 0.7 | 0.84 | 5.75 | 
+| 75 | 0.2 | 0.8 | 0.71 | 5.95 | 
+| 75 | 0.3 | 0.7 | 0.82 | 6.52 | 
+| 75 | 0.3 | 0.8 | 0.85 | 6.58 | 
+| 100 | 0.1 | 0.7 | 0.79 | 5.17 | 
+| 100 | 0.1 | 0.8 | 0.83 | 5.14 | 
+| 100 | 0.2 | 0.7 | 0.74 | 5.79 | 
+| 100 | 0.2 | 0.8 | 0.83 | 7.02 | 
+| 100 | 0.3 | 0.7 | 0.81 | 8.19 | 
+| 100 | 0.3 | 0.8 | 0.87 | 7.55 | 
 
 ## Directory index ##
 
@@ -34,5 +61,7 @@ The following table shows the results of the hyperparameter optimisation. The nu
 - Memoria: Everything related to the thesis documentation.
 
 ## Published works ##
+
 García-Samartín, J.F.; Rieker, A.; Barrientos, A. Design, Manufacturing, and Open-Loop Control of a Soft Pneumatic Arm. _Actuators_ **2024**, 13, 36. https://doi.org/10.3390/act13010036
+
 García-Samartín, J.F.; Molina-Gómez, R.; Barrientos, A. Model-Free Control of a Soft Pneumatic Segment. _Biomimetics_ **2024**, 9, 127. https://doi.org/10.3390/biomimetics9030127
