@@ -26,32 +26,191 @@ The hyperparameters have been decided starting from those established [in this w
 
 The following table shows the results of the hyperparameter optimisation. The number of individuals and elitism and mutation rates have been varied. For each hyperparameter setup, the algorithm has been runned 40 times. For all of them, median error and execution time have been compared for the genetic algorithm without shape control.
 
-| # of individuals | Parents' rate | Mutation rate | Median error (mm) | Median time (s) |
-| --- | --- | --- | --- | --- | 
-| 25 | 0.1 | 0.7 | 1.30 | 3.68 | 
-| 25 | 0.1 | 0.8 | 1.33 | 3.91 | 
-| 25 | 0.2 | 0.7 | 1.31 | 3.42 | 
-| 25 | 0.2 | 0.8 | 1.36 | 3.42 | 
-| 25 | 0.3 | 0.7 | 1.07 | 3.05 | 
-| 25 | 0.3 | 0.8 | 1.99 | 3.14 | 
-| 50 | 0.1 | 0.7 | 0.91 | 6.19 | 
-| 50 | 0.1 | 0.8 | 0.90 | 4.56 | 
-| **50** | **0.2** | **0.7** | **0.88** | **4.31** | 
-| 50 | 0.2 | 0.8 | 0.88 | 4.81 | 
-| 50 | 0.3 | 0.7 | 0.99 | 6.12 | 
-| 50 | 0.3 | 0.8 | 0.90 | 5.03 | 
-| 75 | 0.1 | 0.7 | 0.86 | 5.40 | 
-| 75 | 0.1 | 0.8 | 0.82 | 5.37 | 
-| 75 | 0.2 | 0.7 | 0.84 | 5.75 | 
-| 75 | 0.2 | 0.8 | 0.71 | 5.95 | 
-| 75 | 0.3 | 0.7 | 0.82 | 6.52 | 
-| 75 | 0.3 | 0.8 | 0.85 | 6.58 | 
-| 100 | 0.1 | 0.7 | 0.79 | 5.17 | 
-| 100 | 0.1 | 0.8 | 0.83 | 5.14 | 
-| 100 | 0.2 | 0.7 | 0.74 | 5.79 | 
-| 100 | 0.2 | 0.8 | 0.83 | 7.02 | 
-| 100 | 0.3 | 0.7 | 0.81 | 8.19 | 
-| 100 | 0.3 | 0.8 | 0.87 | 7.55 | 
+<details>
+  <summary><strong>Hyperparameter optimisation table</strong></summary>
+  <table>
+<thead>
+<tr>
+<th># of individuals</th>
+<th>Parents&#39; rate</th>
+<th>Mutation rate</th>
+<th>Median error (mm)</th>
+<th>Median time (s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>25</td>
+<td>0.1</td>
+<td>0.7</td>
+<td>1.30</td>
+<td>3.68</td>
+</tr>
+<tr>
+<td>25</td>
+<td>0.1</td>
+<td>0.8</td>
+<td>1.33</td>
+<td>3.91</td>
+</tr>
+<tr>
+<td>25</td>
+<td>0.2</td>
+<td>0.7</td>
+<td>1.31</td>
+<td>3.42</td>
+</tr>
+<tr>
+<td>25</td>
+<td>0.2</td>
+<td>0.8</td>
+<td>1.36</td>
+<td>3.42</td>
+</tr>
+<tr>
+<td>25</td>
+<td>0.3</td>
+<td>0.7</td>
+<td>1.07</td>
+<td>3.05</td>
+</tr>
+<tr>
+<td>25</td>
+<td>0.3</td>
+<td>0.8</td>
+<td>1.99</td>
+<td>3.14</td>
+</tr>
+<tr>
+<td>50</td>
+<td>0.1</td>
+<td>0.7</td>
+<td>0.91</td>
+<td>6.19</td>
+</tr>
+<tr>
+<td>50</td>
+<td>0.1</td>
+<td>0.8</td>
+<td>0.90</td>
+<td>4.56</td>
+</tr>
+<tr>
+<td><strong>50</strong></td>
+<td><strong>0.2</strong></td>
+<td><strong>0.7</strong></td>
+<td><strong>0.88</strong></td>
+<td><strong>4.31</strong></td>
+</tr>
+<tr>
+<td>50</td>
+<td>0.2</td>
+<td>0.8</td>
+<td>0.88</td>
+<td>4.81</td>
+</tr>
+<tr>
+<td>50</td>
+<td>0.3</td>
+<td>0.7</td>
+<td>0.99</td>
+<td>6.12</td>
+</tr>
+<tr>
+<td>50</td>
+<td>0.3</td>
+<td>0.8</td>
+<td>0.90</td>
+<td>5.03</td>
+</tr>
+<tr>
+<td>75</td>
+<td>0.1</td>
+<td>0.7</td>
+<td>0.86</td>
+<td>5.40</td>
+</tr>
+<tr>
+<td>75</td>
+<td>0.1</td>
+<td>0.8</td>
+<td>0.82</td>
+<td>5.37</td>
+</tr>
+<tr>
+<td>75</td>
+<td>0.2</td>
+<td>0.7</td>
+<td>0.84</td>
+<td>5.75</td>
+</tr>
+<tr>
+<td>75</td>
+<td>0.2</td>
+<td>0.8</td>
+<td>0.71</td>
+<td>5.95</td>
+</tr>
+<tr>
+<td>75</td>
+<td>0.3</td>
+<td>0.7</td>
+<td>0.82</td>
+<td>6.52</td>
+</tr>
+<tr>
+<td>75</td>
+<td>0.3</td>
+<td>0.8</td>
+<td>0.85</td>
+<td>6.58</td>
+</tr>
+<tr>
+<td>100</td>
+<td>0.1</td>
+<td>0.7</td>
+<td>0.79</td>
+<td>5.17</td>
+</tr>
+<tr>
+<td>100</td>
+<td>0.1</td>
+<td>0.8</td>
+<td>0.83</td>
+<td>5.14</td>
+</tr>
+<tr>
+<td>100</td>
+<td>0.2</td>
+<td>0.7</td>
+<td>0.74</td>
+<td>5.79</td>
+</tr>
+<tr>
+<td>100</td>
+<td>0.2</td>
+<td>0.8</td>
+<td>0.83</td>
+<td>7.02</td>
+</tr>
+<tr>
+<td>100</td>
+<td>0.3</td>
+<td>0.7</td>
+<td>0.81</td>
+<td>8.19</td>
+</tr>
+<tr>
+<td>100</td>
+<td>0.3</td>
+<td>0.8</td>
+<td>0.87</td>
+<td>7.55</td>
+</tr>
+</tbody>
+</table>
+ 
+</details>
 
 ## Directory index ##
 
