@@ -26,8 +26,8 @@ The hyperparameters have been decided starting from those established [in this w
 
 The following table shows the results of the hyperparameter optimisation. The number of individuals and elitism and mutation rates have been varied. For each hyperparameter setup, the algorithm has been runned 40 times. For all of them, median error and execution time have been compared for the genetic algorithm without shape control.
 
-<!--<details>
-  <summary><strong>Hyperparameter optimisation table</strong></summary>-->
+<details>
+  <summary><strong>Hyperparameter optimisation table</strong></summary>
   <table>
     <thead>
     <tr>
@@ -210,7 +210,7 @@ The following table shows the results of the hyperparameter optimisation. The nu
     </tbody>
   </table>
  
-<!--</details>-->
+</details>
 
 ## Directory index ##
 
@@ -224,3 +224,5 @@ The following table shows the results of the hyperparameter optimisation. The nu
 García-Samartín, J.F.; Rieker, A.; Barrientos, A. Design, Manufacturing, and Open-Loop Control of a Soft Pneumatic Arm. _Actuators_ **2024**, 13, 36. https://doi.org/10.3390/act13010036
 
 García-Samartín, J.F.; Molina-Gómez, R.; Barrientos, A. Model-Free Control of a Soft Pneumatic Segment. _Biomimetics_ **2024**, 9, 127. https://doi.org/10.3390/biomimetics9030127
+
+García-Samartín, J.F., del Cerro, J., Barrientos, A. Inverse kinematic modelling with shape control of a soft robot using genetic algorithms. _Jornadas de Automática_ **2024**, 45. https://doi.org/10.17979/ja-cea.2024.45.10968
